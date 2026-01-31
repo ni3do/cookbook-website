@@ -1,0 +1,222 @@
+/* Print stylesheet for recipe pages */
+@media print {
+  /* Reset colors for print - use black text on white background */
+  :root,
+  :root.light {
+    --color-text: #000 !important;
+    --color-subtext1: #333 !important;
+    --color-subtext0: #444 !important;
+    --color-overlay0: #555 !important;
+    --color-base: #fff !important;
+    --color-surface0: #fff !important;
+    --color-surface1: #eee !important;
+    --color-mauve: #6b21a8 !important;
+    --color-peach: #c2410c !important;
+    --color-green: #166534 !important;
+    --color-yellow: #a16207 !important;
+    --color-sapphire: #0369a1 !important;
+  }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+
+  /* Hide non-essential elements for print */
+  header,
+  .cook-mode,
+  .cook-mode-toggle,
+  .favorite-btn,
+  .theme-toggle,
+  [data-comments-placeholder] {
+    display: none !important;
+  }
+
+  /* Hide the "Back to recipes" link */
+  a[href="/"] {
+    display: none !important;
+  }
+
+  /* Hide the comments placeholder section */
+  .border-t.border-ctp-surface1.pt-8 {
+    display: none !important;
+  }
+
+  /* Reset max-width constraints for full page use */
+  .max-w-5xl,
+  .max-w-6xl {
+    max-width: 100% !important;
+  }
+
+  /* Remove background colors and borders from cards */
+  .bg-ctp-surface0,
+  .bg-ctp-mantle {
+    background: #fff !important;
+    border: 1px solid #ddd !important;
+  }
+
+  /* Remove backdrop blur and sticky positioning */
+  .sticky {
+    position: static !important;
+  }
+
+  .backdrop-blur-md {
+    backdrop-filter: none !important;
+  }
+
+  /* Recipe image - scale nicely for print */
+  .aspect-\[16\/9\],
+  .aspect-\[21\/9\] {
+    aspect-ratio: 16/9 !important;
+    page-break-inside: avoid;
+  }
+
+  img {
+    max-height: 3in;
+    width: auto;
+    object-fit: contain;
+    page-break-inside: avoid;
+  }
+
+  /* Make the hero image container full width but reasonable height */
+  .rounded-2xl.overflow-hidden {
+    border-radius: 0 !important;
+    max-height: 3in;
+  }
+
+  /* Single column layout for print */
+  .grid.grid-cols-1.lg\:grid-cols-12 {
+    display: block !important;
+  }
+
+  .lg\:col-span-4,
+  .lg\:col-span-8 {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-bottom: 1rem;
+  }
+
+  /* Ingredients section styling */
+  .ingredient-list {
+    columns: 2;
+    column-gap: 2rem;
+  }
+
+  .ingredient-list li {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Hide checkboxes in print - show bullet points instead */
+  .ingredient-checkbox {
+    display: none !important;
+  }
+
+  .ingredient-label {
+    text-decoration: none !important;
+    color: #000 !important;
+  }
+
+  .ingredient-label::before {
+    content: "• ";
+    font-weight: bold;
+  }
+
+  /* Steps styling for print */
+  ol.space-y-6 li {
+    page-break-inside: avoid;
+    margin-bottom: 0.75rem;
+  }
+
+  /* Step numbers */
+  .rounded-full.bg-ctp-mauve {
+    background: #6b21a8 !important;
+    color: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Tags - style for print */
+  .rounded-full.bg-ctp-green\/20 {
+    background: transparent !important;
+    border: 1px solid #166534 !important;
+    color: #166534 !important;
+  }
+
+  /* Tips/Notes section */
+  .bg-ctp-yellow\/10 {
+    background: #fef9c3 !important;
+    border: 1px solid #a16207 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Metadata badges */
+  .inline-flex.items-center.gap-1\.5.px-3.py-1\.5.rounded-full {
+    background: transparent !important;
+    border: 1px solid #ddd !important;
+    padding: 0.25rem 0.5rem !important;
+  }
+
+  /* Servings scaler - show just the current value */
+  .servings-scaler button {
+    display: none !important;
+  }
+
+  /* Source attribution - ensure link URL is visible */
+  a[target="_blank"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.75em;
+    color: #666;
+    word-break: break-all;
+  }
+
+  /* External link icon - hide in print */
+  a[target="_blank"] svg {
+    display: none !important;
+  }
+
+  /* Page break handling */
+  h1,
+  h2,
+  h3 {
+    page-break-after: avoid;
+  }
+
+  .mb-12 {
+    page-break-before: auto;
+  }
+
+  /* Ensure recipe title and metadata stay together */
+  .max-w-5xl.mx-auto.px-4.mb-8:has(h1) {
+    page-break-inside: avoid;
+  }
+
+  /* Remove hover effects and transitions */
+  * {
+    transition: none !important;
+  }
+
+  /* Remove rounded corners for cleaner print */
+  .rounded-xl,
+  .rounded-2xl {
+    border-radius: 0.25rem !important;
+  }
+
+  /* Print footer with URL */
+  @page {
+    margin: 0.75in;
+  }
+
+  /* Add a print header with recipe attribution */
+  body::after {
+    content: "Printed from The Kyburz Table";
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    font-size: 8pt;
+    color: #999;
+  }
+}
