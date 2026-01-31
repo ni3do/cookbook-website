@@ -1,0 +1,9 @@
+{
+  "current_iteration": 11,
+  "max_iterations": 20,
+  "mode": "plan",
+  "start_mode": null,
+  "stop_on_failure": true,
+  "waiting_until": null,
+  "waiting_for_iteration": null
+}
