@@ -15,16 +15,39 @@ const displayTags = tags.slice(0, 3);
 const imagePath = `/images/recipes/${image}`;
 ---
 
-<a
-  href={`/recipes/${slug}`}
+<div
   class:list={[
-    'group block bg-ctp-surface0 rounded-2xl overflow-hidden',
+    'recipe-card relative group bg-ctp-surface0 rounded-2xl overflow-hidden',
     'border border-ctp-surface1',
     'transition-all duration-200',
     'hover:bg-ctp-surface1 hover:shadow-soft-md hover:scale-[1.01]',
     className,
   ]}
+  data-slug={slug}
 >
+  {/* Favorite Button */}
+  <button
+    type="button"
+    class="favorite-btn absolute top-3 right-3 z-10 p-2 rounded-full bg-ctp-base/70 backdrop-blur-sm border border-ctp-surface1 transition-all hover:bg-ctp-base hover:scale-110"
+    aria-label="Add to favorites"
+    data-slug={slug}
+  >
+    <svg
+      class="favorite-icon w-5 h-5 transition-colors"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      stroke-width="2"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+      />
+    </svg>
+  </button>
+
+  <a href={`/recipes/${slug}`} class="block">
   {/* Image container with aspect ratio */}
   <div class="relative aspect-[4/3] overflow-hidden bg-ctp-surface1">
     <img
@@ -100,4 +123,70 @@ const imagePath = `/images/recipes/${image}`;
       )
     }
   </div>
-</a>
+  </a>
+</div>
+
+<style>
+  .favorite-btn .favorite-icon {
+    @apply text-ctp-overlay0;
+  }
+
+  .favorite-btn:hover .favorite-icon {
+    @apply text-ctp-red;
+  }
+
+  .favorite-btn.is-favorite .favorite-icon {
+    @apply fill-ctp-red text-ctp-red;
+  }
+</style>
+
+<script>
+  // Initialize favorites from localStorage
+  function initFavorites() {
+    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]') as string[];
+    document.querySelectorAll('.favorite-btn').forEach((btn) => {
+      const slug = (btn as HTMLElement).dataset.slug;
+      if (slug && favorites.includes(slug)) {
+        btn.classList.add('is-favorite');
+        btn.setAttribute('aria-label', 'Remove from favorites');
+      }
+    });
+  }
+
+  // Toggle favorite status
+  function toggleFavorite(slug: string, btn: HTMLElement) {
+    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]') as string[];
+    const index = favorites.indexOf(slug);
+
+    if (index === -1) {
+      favorites.push(slug);
+      btn.classList.add('is-favorite');
+      btn.setAttribute('aria-label', 'Remove from favorites');
+    } else {
+      favorites.splice(index, 1);
+      btn.classList.remove('is-favorite');
+      btn.setAttribute('aria-label', 'Add to favorites');
+    }
+
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+  }
+
+  // Event delegation for favorite buttons
+  document.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest('.favorite-btn') as HTMLElement;
+    if (btn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const slug = btn.dataset.slug;
+      if (slug) {
+        toggleFavorite(slug, btn);
+      }
+    }
+  });
+
+  // Initialize on page load
+  initFavorites();
+
+  // Re-initialize when navigating with View Transitions (if enabled)
+  document.addEventListener('astro:page-load', initFavorites);
+</script>

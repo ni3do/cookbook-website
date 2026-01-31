@@ -1,10 +1,220 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import RecipeCard from '../components/RecipeCard.astro';
+import { getCollection } from 'astro:content';
+import { RECIPE_TAGS } from '../content/config';
+
+// Fetch all recipes
+const recipes = await getCollection('recipes');
+
+// Get unique tags from all recipes, sorted by frequency
+const tagCounts = new Map<string, number>();
+recipes.forEach((recipe) => {
+  recipe.data.tags.forEach((tag) => {
+    tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+  });
+});
+const popularTags = [...tagCounts.entries()]
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 12)
+  .map(([tag]) => tag);
 ---
 
 <BaseLayout title="Home">
-  <div class="max-w-4xl mx-auto p-8">
-    <h1 class="text-4xl font-bold text-ctp-mauve mb-4">The Kyburz Table</h1>
-    <p class="text-ctp-subtext1">A modern recipe website coming soon.</p>
-  </div>
+  {/* Hero Section */}
+  <section class="bg-gradient-to-b from-ctp-mantle to-ctp-base py-12 md:py-16">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+      <h1 class="text-4xl md:text-5xl font-bold text-ctp-text mb-4">
+        Welcome to <span class="text-ctp-mauve">The Kyburz Table</span>
+      </h1>
+      <p class="text-lg text-ctp-subtext1 mb-8 max-w-2xl mx-auto">
+        A collection of tried and tested recipes for home cooks. Simple, delicious, and made with love.
+      </p>
+
+      {/* Search Bar */}
+      <div class="max-w-xl mx-auto mb-8">
+        <div class="relative">
+          <svg
+            class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ctp-overlay0"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+          <input
+            type="search"
+            id="recipe-search"
+            placeholder="Search recipes by name or ingredient..."
+            class="w-full pl-12 pr-4 py-3 bg-ctp-surface0 text-ctp-text placeholder-ctp-overlay0 rounded-2xl border border-ctp-surface1 focus:border-ctp-mauve focus:outline-none focus:ring-2 focus:ring-ctp-mauve/30 transition-all text-lg"
+          />
+        </div>
+      </div>
+
+      {/* Tag Filter Pills */}
+      <div class="flex flex-wrap justify-center gap-2" id="tag-filters">
+        <button
+          type="button"
+          data-tag="all"
+          class="tag-pill active px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-ctp-mauve text-ctp-base"
+        >
+          All Recipes
+        </button>
+        {
+          popularTags.map((tag) => (
+            <button
+              type="button"
+              data-tag={tag}
+              class="tag-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-ctp-surface0 text-ctp-subtext1 hover:bg-ctp-surface1 border border-ctp-surface1"
+            >
+              {tag.replace(/-/g, ' ')}
+            </button>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  {/* Recipe Grid */}
+  <section class="max-w-6xl mx-auto px-4 py-12">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="text-2xl font-bold text-ctp-text">
+        <span id="grid-title">All Recipes</span>
+        <span id="recipe-count" class="text-ctp-subtext0 font-normal text-lg ml-2">
+          ({recipes.length})
+        </span>
+      </h2>
+    </div>
+
+    {/* Recipe Grid */}
+    <div
+      id="recipe-grid"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+    >
+      {
+        recipes.map((recipe) => (
+          <div
+            class="recipe-item"
+            data-title={recipe.data.title.toLowerCase()}
+            data-tags={recipe.data.tags.join(',')}
+          >
+            <RecipeCard recipe={recipe} />
+          </div>
+        ))
+      }
+    </div>
+
+    {/* No Results Message */}
+    <div
+      id="no-results"
+      class="hidden text-center py-16"
+    >
+      <svg
+        class="w-16 h-16 mx-auto text-ctp-overlay0 mb-4"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        stroke-width="1.5"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+        />
+      </svg>
+      <h3 class="text-xl font-semibold text-ctp-text mb-2">No recipes found</h3>
+      <p class="text-ctp-subtext1">
+        Try adjusting your search or filter to find what you're looking for.
+      </p>
+    </div>
+  </section>
 </BaseLayout>
+
+<style>
+  .tag-pill.active {
+    @apply bg-ctp-mauve text-ctp-base border-ctp-mauve;
+  }
+</style>
+
+<script>
+  // Client-side search and filter functionality
+  const searchInput = document.getElementById('recipe-search') as HTMLInputElement;
+  const tagFilters = document.getElementById('tag-filters');
+  const recipeGrid = document.getElementById('recipe-grid');
+  const noResults = document.getElementById('no-results');
+  const gridTitle = document.getElementById('grid-title');
+  const recipeCount = document.getElementById('recipe-count');
+
+  let activeTag = 'all';
+  let searchQuery = '';
+
+  function filterRecipes() {
+    const items = recipeGrid?.querySelectorAll('.recipe-item') as NodeListOf<HTMLElement>;
+    let visibleCount = 0;
+
+    items?.forEach((item) => {
+      const title = item.dataset.title || '';
+      const tags = item.dataset.tags || '';
+
+      const matchesSearch = searchQuery === '' || title.includes(searchQuery.toLowerCase());
+      const matchesTag = activeTag === 'all' || tags.split(',').includes(activeTag);
+
+      if (matchesSearch && matchesTag) {
+        item.classList.remove('hidden');
+        visibleCount++;
+      } else {
+        item.classList.add('hidden');
+      }
+    });
+
+    // Update count and no results message
+    if (recipeCount) {
+      recipeCount.textContent = `(${visibleCount})`;
+    }
+
+    if (noResults) {
+      noResults.classList.toggle('hidden', visibleCount > 0);
+    }
+
+    if (recipeGrid) {
+      recipeGrid.classList.toggle('hidden', visibleCount === 0);
+    }
+
+    // Update grid title
+    if (gridTitle) {
+      if (activeTag === 'all') {
+        gridTitle.textContent = searchQuery ? `Search Results` : 'All Recipes';
+      } else {
+        gridTitle.textContent = activeTag.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+      }
+    }
+  }
+
+  // Search input handler
+  searchInput?.addEventListener('input', (e) => {
+    searchQuery = (e.target as HTMLInputElement).value;
+    filterRecipes();
+  });
+
+  // Tag filter handler
+  tagFilters?.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    if (target.classList.contains('tag-pill')) {
+      // Update active state
+      tagFilters.querySelectorAll('.tag-pill').forEach((pill) => {
+        pill.classList.remove('active', 'bg-ctp-mauve', 'text-ctp-base', 'border-ctp-mauve');
+        pill.classList.add('bg-ctp-surface0', 'text-ctp-subtext1', 'border-ctp-surface1');
+      });
+      target.classList.add('active', 'bg-ctp-mauve', 'text-ctp-base', 'border-ctp-mauve');
+      target.classList.remove('bg-ctp-surface0', 'text-ctp-subtext1', 'border-ctp-surface1');
+
+      activeTag = target.dataset.tag || 'all';
+      filterRecipes();
+    }
+  });
+</script>
