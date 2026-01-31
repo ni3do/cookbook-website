@@ -1,0 +1,118 @@
+---
+interface Props {
+  servings: number;
+  slug: string;
+}
+
+const { servings, slug } = Astro.props;
+---
+
+<div
+  class="servings-scaler inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-ctp-surface0 text-ctp-subtext1 text-sm"
+  data-base-servings={servings}
+  data-slug={slug}
+>
+  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+    />
+  </svg>
+
+  <button
+    type="button"
+    class="scaler-btn scaler-decrease w-6 h-6 flex items-center justify-center rounded-full bg-ctp-surface1 hover:bg-ctp-surface2 text-ctp-text transition-colors"
+    aria-label="Decrease servings"
+  >
+    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
+    </svg>
+  </button>
+
+  <span class="servings-display min-w-[3rem] text-center font-medium text-ctp-text">
+    <span class="servings-value">{servings}</span> servings
+  </span>
+
+  <button
+    type="button"
+    class="scaler-btn scaler-increase w-6 h-6 flex items-center justify-center rounded-full bg-ctp-surface1 hover:bg-ctp-surface2 text-ctp-text transition-colors"
+    aria-label="Increase servings"
+  >
+    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+    </svg>
+  </button>
+</div>
+
+<script>
+  function initServingsScaler() {
+    document.querySelectorAll('.servings-scaler').forEach((scaler) => {
+      const baseServings = parseInt((scaler as HTMLElement).dataset.baseServings || '4', 10);
+      const slug = (scaler as HTMLElement).dataset.slug || '';
+      const valueEl = scaler.querySelector('.servings-value');
+      const decreaseBtn = scaler.querySelector('.scaler-decrease');
+      const increaseBtn = scaler.querySelector('.scaler-increase');
+
+      if (!valueEl || !decreaseBtn || !increaseBtn) return;
+
+      // Load saved servings from localStorage
+      const storageKey = `servings-${slug}`;
+      const savedServings = localStorage.getItem(storageKey);
+      let currentServings = savedServings ? parseInt(savedServings, 10) : baseServings;
+
+      // Validate saved value
+      if (isNaN(currentServings) || currentServings < 1) {
+        currentServings = baseServings;
+      }
+
+      // Update display
+      function updateDisplay() {
+        valueEl!.textContent = String(currentServings);
+        // Dispatch custom event for other components to react
+        const event = new CustomEvent('servingschange', {
+          detail: {
+            servings: currentServings,
+            baseServings,
+            ratio: currentServings / baseServings,
+            slug,
+          },
+          bubbles: true,
+        });
+        scaler.dispatchEvent(event);
+      }
+
+      // Save to localStorage
+      function saveServings() {
+        localStorage.setItem(storageKey, String(currentServings));
+      }
+
+      // Initialize display (will trigger event for initial scaling)
+      updateDisplay();
+
+      // Decrease button
+      decreaseBtn.addEventListener('click', () => {
+        if (currentServings > 1) {
+          currentServings--;
+          updateDisplay();
+          saveServings();
+        }
+      });
+
+      // Increase button
+      increaseBtn.addEventListener('click', () => {
+        if (currentServings < 99) {
+          currentServings++;
+          updateDisplay();
+          saveServings();
+        }
+      });
+    });
+  }
+
+  // Initialize on page load
+  initServingsScaler();
+
+  // Re-initialize when navigating with View Transitions
+  document.addEventListener('astro:page-load', initServingsScaler);
+</script>
