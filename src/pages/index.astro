@@ -18,6 +18,45 @@ const popularTags = [...tagCounts.entries()]
   .sort((a, b) => b[1] - a[1])
   .slice(0, 12)
   .map(([tag]) => tag);
+
+// Extract ingredient names from recipe body for search
+function extractIngredients(body: string): string {
+  const ingredients: string[] = [];
+
+  // Split by h2 headings and find ingredient sections (contain bullet points)
+  const parts = body.split(/^## /m).filter(Boolean);
+
+  for (const part of parts) {
+    const lines = part.trim().split('\n');
+    const heading = lines[0].trim().toLowerCase();
+
+    // Skip the steps/instructions section
+    if (heading === 'steps' || heading === 'instructions' || heading === 'directions' || heading === 'method') {
+      continue;
+    }
+
+    // Extract bullet point items (ingredients)
+    const bodyText = lines.slice(1).join('\n');
+    const bulletItems = bodyText.match(/^-\s+.+$/gm);
+
+    if (bulletItems) {
+      for (const item of bulletItems) {
+        // Remove the bullet point prefix and backtick-enclosed quantities
+        const cleaned = item
+          .replace(/^-\s+/, '') // Remove bullet prefix
+          .replace(/`[^`]+`\s*/g, '') // Remove quantities like `500g`, `2 tbsp`
+          .trim()
+          .toLowerCase();
+
+        if (cleaned) {
+          ingredients.push(cleaned);
+        }
+      }
+    }
+  }
+
+  return ingredients.join(' ');
+}
 ---
 
 <BaseLayout title="Home">
@@ -102,6 +141,7 @@ const popularTags = [...tagCounts.entries()]
             class="recipe-item"
             data-title={recipe.data.title.toLowerCase()}
             data-tags={recipe.data.tags.join(',')}
+            data-ingredients={extractIngredients(recipe.body)}
           >
             <RecipeCard recipe={recipe} />
           </div>
@@ -160,8 +200,12 @@ const popularTags = [...tagCounts.entries()]
     items?.forEach((item) => {
       const title = item.dataset.title || '';
       const tags = item.dataset.tags || '';
+      const ingredients = item.dataset.ingredients || '';
 
-      const matchesSearch = searchQuery === '' || title.includes(searchQuery.toLowerCase());
+      const query = searchQuery.toLowerCase();
+      const matchesSearch = searchQuery === '' ||
+        title.includes(query) ||
+        ingredients.includes(query);
       const matchesTag = activeTag === 'all' || tags.split(',').includes(activeTag);
 
       if (matchesSearch && matchesTag) {
