@@ -1,18 +1,10 @@
 ---
-// The Kyburz Table - Home Page
+import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="generator" content={Astro.generator} />
-    <title>The Kyburz Table</title>
-  </head>
-  <body>
-    <h1>The Kyburz Table</h1>
-    <p>A modern recipe website coming soon.</p>
-  </body>
-</html>
+<BaseLayout title="Home">
+  <div class="max-w-4xl mx-auto p-8">
+    <h1 class="text-4xl font-bold text-ctp-mauve mb-4">The Kyburz Table</h1>
+    <p class="text-ctp-subtext1">A modern recipe website coming soon.</p>
+  </div>
+</BaseLayout>
