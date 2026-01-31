@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ServingsScaler from '../../components/ServingsScaler.astro';
+import CookMode from '../../components/CookMode.astro';
 import { getCollection, type CollectionEntry } from 'astro:content';
 
 // Prerender all recipe pages at build time
@@ -80,6 +81,9 @@ function parseRecipeContent(content: string) {
 const parsedContent = parseRecipeContent(rawBody);
 const ingredientSections = parsedContent.filter((s) => s.type === 'ingredients');
 const stepsSections = parsedContent.filter((s) => s.type === 'steps');
+
+// Flatten all steps into a single array for cook mode
+const allSteps = stepsSections.flatMap((section) => section.items);
 ---
 
 <BaseLayout
@@ -195,6 +199,13 @@ const stepsSections = parsedContent.filter((s) => s.type === 'steps');
         ) : (
           <span>{source.name}</span>
         )}
+      </div>
+    )}
+
+    {/* Cook Mode Button */}
+    {allSteps.length > 0 && (
+      <div class="mt-4">
+        <CookMode steps={allSteps} slug={slug} />
       </div>
     )}
   </div>
