@@ -220,7 +220,7 @@ const stepsSections = parsedContent.filter((s) => s.type === 'steps');
                     {section.heading}
                   </h3>
                 )}
-                <ul class="space-y-2" data-section={sectionIndex}>
+                <ul class="space-y-2 ingredient-list" data-section={sectionIndex}>
                   {section.items.map((ingredient, index) => (
                     <li class="flex items-start gap-3">
                       <input
@@ -234,7 +234,8 @@ const stepsSections = parsedContent.filter((s) => s.type === 'steps');
                       <label
                         for={`ingredient-${sectionIndex}-${index}`}
                         class="ingredient-label text-ctp-text cursor-pointer select-none"
-                        set:html={ingredient.replace(/`([^`]+)`/g, '<strong class="text-ctp-peach">$1</strong>')}
+                        data-original={ingredient}
+                        set:html={ingredient.replace(/`([^`]+)`/g, '<strong class="scalable-amount text-ctp-peach" data-original="$1">$1</strong>')}
                       />
                     </li>
                   ))}
@@ -436,4 +437,111 @@ const stepsSections = parsedContent.filter((s) => s.type === 'steps');
     initFavorites();
     initIngredientCheckboxes();
   });
+
+  // Ingredient scaling functionality
+  function parseAmount(amountStr: string): { value: number; unit: string; original: string } | null {
+    // Handle fractions like "1/2", "1 1/2", etc.
+    const fractionPattern = /^(\d+)?\s*(\d+)\/(\d+)\s*(.*)$/;
+    const fractionMatch = amountStr.match(fractionPattern);
+
+    if (fractionMatch) {
+      const whole = fractionMatch[1] ? parseInt(fractionMatch[1], 10) : 0;
+      const numerator = parseInt(fractionMatch[2], 10);
+      const denominator = parseInt(fractionMatch[3], 10);
+      const unit = fractionMatch[4].trim();
+      const value = whole + numerator / denominator;
+      return { value, unit, original: amountStr };
+    }
+
+    // Handle simple numbers with optional decimal (e.g., "400g", "2.5 cups", "3 tbsp")
+    const simplePattern = /^([\d.]+)\s*(.*)$/;
+    const simpleMatch = amountStr.match(simplePattern);
+
+    if (simpleMatch) {
+      const value = parseFloat(simpleMatch[1]);
+      const unit = simpleMatch[2].trim();
+      if (!isNaN(value)) {
+        return { value, unit, original: amountStr };
+      }
+    }
+
+    return null;
+  }
+
+  function formatAmount(value: number, unit: string): string {
+    // Round to a sensible precision
+    let formatted: string;
+
+    if (value === Math.floor(value)) {
+      // Whole number
+      formatted = String(Math.round(value));
+    } else if (value < 1) {
+      // Small fractions - check for common fractions
+      const fractions: [number, string][] = [
+        [0.25, '1/4'],
+        [0.333, '1/3'],
+        [0.5, '1/2'],
+        [0.666, '2/3'],
+        [0.75, '3/4'],
+      ];
+      const match = fractions.find(([frac]) => Math.abs(value - frac) < 0.05);
+      if (match) {
+        formatted = match[1];
+      } else {
+        formatted = value.toFixed(1).replace(/\.0$/, '');
+      }
+    } else {
+      // Mixed numbers - check if fractional part is close to common fraction
+      const whole = Math.floor(value);
+      const frac = value - whole;
+
+      if (frac < 0.1) {
+        formatted = String(whole);
+      } else if (Math.abs(frac - 0.25) < 0.05) {
+        formatted = `${whole} 1/4`;
+      } else if (Math.abs(frac - 0.333) < 0.05) {
+        formatted = `${whole} 1/3`;
+      } else if (Math.abs(frac - 0.5) < 0.05) {
+        formatted = `${whole} 1/2`;
+      } else if (Math.abs(frac - 0.666) < 0.05) {
+        formatted = `${whole} 2/3`;
+      } else if (Math.abs(frac - 0.75) < 0.05) {
+        formatted = `${whole} 3/4`;
+      } else if (frac > 0.9) {
+        formatted = String(whole + 1);
+      } else {
+        formatted = value.toFixed(1).replace(/\.0$/, '');
+      }
+    }
+
+    // Combine with unit (no space if unit starts with a letter attached to number, e.g., "400g")
+    if (unit) {
+      // If original had no space between number and unit (like "400g"), keep it that way
+      return `${formatted}${unit}`;
+    }
+    return formatted;
+  }
+
+  function scaleIngredients(ratio: number) {
+    document.querySelectorAll('.scalable-amount').forEach((el) => {
+      const originalAmount = (el as HTMLElement).dataset.original;
+      if (!originalAmount) return;
+
+      const parsed = parseAmount(originalAmount);
+      if (!parsed) {
+        // Can't parse, just show original
+        el.textContent = originalAmount;
+        return;
+      }
+
+      const scaledValue = parsed.value * ratio;
+      el.textContent = formatAmount(scaledValue, parsed.unit);
+    });
+  }
+
+  // Listen for servings change events
+  document.addEventListener('servingschange', ((e: CustomEvent) => {
+    const { ratio } = e.detail;
+    scaleIngredients(ratio);
+  }) as EventListener);
 </script>
