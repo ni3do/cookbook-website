@@ -1,0 +1,103 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  recipe: CollectionEntry<'recipes'>;
+  class?: string;
+}
+
+const { recipe, class: className = '' } = Astro.props;
+const { data, slug } = recipe;
+const { title, image, prep_time, cook_time, tags } = data;
+
+const totalTime = prep_time + cook_time;
+const displayTags = tags.slice(0, 3);
+const imagePath = `/images/recipes/${image}`;
+---
+
+<a
+  href={`/recipes/${slug}`}
+  class:list={[
+    'group block bg-ctp-surface0 rounded-2xl overflow-hidden',
+    'border border-ctp-surface1',
+    'transition-all duration-200',
+    'hover:bg-ctp-surface1 hover:shadow-soft-md hover:scale-[1.01]',
+    className,
+  ]}
+>
+  {/* Image container with aspect ratio */}
+  <div class="relative aspect-[4/3] overflow-hidden bg-ctp-surface1">
+    <img
+      src={imagePath}
+      alt={title}
+      loading="lazy"
+      class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+    />
+  </div>
+
+  {/* Content */}
+  <div class="p-4">
+    {/* Title */}
+    <h3 class="text-lg font-semibold text-ctp-text mb-2 line-clamp-2">
+      {title}
+    </h3>
+
+    {/* Time and rating row */}
+    <div class="flex items-center justify-between mb-3">
+      {/* Time badge */}
+      <div class="flex items-center gap-1.5 text-sm text-ctp-subtext1">
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+        <span>{totalTime} min</span>
+      </div>
+
+      {/* Rating placeholder - will show actual ratings once Phase 4 is implemented */}
+      <div
+        class="flex items-center gap-1 text-sm text-ctp-yellow"
+        title="Rating coming soon"
+      >
+        <svg
+          class="w-4 h-4"
+          fill="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+          />
+        </svg>
+        <span class="text-ctp-subtext1">--</span>
+      </div>
+    </div>
+
+    {/* Tags */}
+    {
+      displayTags.length > 0 && (
+        <div class="flex flex-wrap gap-1.5">
+          {displayTags.map((tag) => (
+            <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-ctp-surface2 text-ctp-subtext1">
+              {tag}
+            </span>
+          ))}
+          {tags.length > 3 && (
+            <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-ctp-surface2 text-ctp-overlay0">
+              +{tags.length - 3}
+            </span>
+          )}
+        </div>
+      )
+    }
+  </div>
+</a>
