@@ -1,0 +1,27 @@
+#!/bin/bash
+# ralph-loop hook: post-iteration
+# Runs after each iteration completes.
+#
+# Available environment variables:
+#   RALPH_WORKING_DIR       - Project working directory
+#   RALPH_HOOKS_DIR         - Path to .ralph/hooks/
+#   RALPH_PLAN_FILE         - Path to the plan file
+#   RALPH_MODE              - Current mode: "plan" or "build"
+#   RALPH_ITERATION         - Current iteration number
+#   RALPH_ITERATION_SUCCESS - "true" if iteration succeeded, "false" otherwise
+#   RALPH_ITERATION_COST_USD - Cost of the iteration in USD (if available)
+#
+# Exit codes:
+#   0 - Success (hook completed normally)
+#   Non-zero - Failure (logged as warning, loop continues)
+#
+# To enable this hook:
+#   mv post-iteration.sample post-iteration
+#   chmod +x post-iteration
+
+echo "Completed iteration $RALPH_ITERATION (success: $RALPH_ITERATION_SUCCESS)"
+
+# Example: Log cost to a file
+# if [ -n "$RALPH_ITERATION_COST_USD" ]; then
+#   echo "$(date): Iteration $RALPH_ITERATION cost \$$RALPH_ITERATION_COST_USD" >> costs.log
+# fi

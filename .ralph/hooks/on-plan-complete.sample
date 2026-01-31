@@ -1,0 +1,24 @@
+#!/bin/bash
+# ralph-loop hook: on-plan-complete
+# Runs when all tasks in the plan are complete.
+#
+# Available environment variables:
+#   RALPH_WORKING_DIR      - Project working directory
+#   RALPH_HOOKS_DIR        - Path to .ralph/hooks/
+#   RALPH_PLAN_FILE        - Path to the plan file
+#   RALPH_TOTAL_ITERATIONS - Total number of iterations run
+#   RALPH_TOTAL_COST_USD   - Total cost in USD (if available)
+#
+# Exit codes:
+#   0 - Success (hook completed normally)
+#   Non-zero - Failure (logged as warning, loop continues)
+#
+# To enable this hook:
+#   mv on-plan-complete.sample on-plan-complete
+#   chmod +x on-plan-complete
+
+echo "Plan complete! Ran $RALPH_TOTAL_ITERATIONS iterations."
+
+# Example: Send completion notification
+# curl -X POST "https://hooks.slack.com/..." \
+#   -d "{\"text\": \"Plan complete! Total cost: \$$RALPH_TOTAL_COST_USD\"}"

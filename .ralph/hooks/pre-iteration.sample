@@ -1,0 +1,20 @@
+#!/bin/bash
+# ralph-loop hook: pre-iteration
+# Runs before each iteration starts.
+#
+# Available environment variables:
+#   RALPH_WORKING_DIR   - Project working directory
+#   RALPH_HOOKS_DIR     - Path to .ralph/hooks/
+#   RALPH_PLAN_FILE     - Path to the plan file
+#   RALPH_MODE          - Current mode: "plan" or "build"
+#   RALPH_ITERATION     - Current iteration number
+#
+# Exit codes:
+#   0 - Success (hook completed normally)
+#   Non-zero - Failure (logged as warning, loop continues)
+#
+# To enable this hook:
+#   mv pre-iteration.sample pre-iteration
+#   chmod +x pre-iteration
+
+echo "Starting iteration $RALPH_ITERATION in $RALPH_MODE mode"

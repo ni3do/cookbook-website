@@ -1,0 +1,21 @@
+#!/bin/bash
+# ralph-loop hook: post-commit
+# Runs after changes are committed.
+#
+# Available environment variables:
+#   RALPH_WORKING_DIR    - Project working directory
+#   RALPH_HOOKS_DIR      - Path to .ralph/hooks/
+#   RALPH_PLAN_FILE      - Path to the plan file
+#   RALPH_FILES_CHANGED  - Number of files committed
+#   RALPH_COMMIT_HASH    - Short hash of the commit
+#   RALPH_COMMIT_MESSAGE - Commit message
+#
+# Exit codes:
+#   0 - Success (hook completed normally)
+#   Non-zero - Failure (logged as warning, loop continues)
+#
+# To enable this hook:
+#   mv post-commit.sample post-commit
+#   chmod +x post-commit
+
+echo "Committed $RALPH_COMMIT_HASH: $RALPH_COMMIT_MESSAGE"

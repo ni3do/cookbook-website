@@ -1,0 +1,19 @@
+#!/bin/bash
+# ralph-loop hook: pre-commit
+# Runs before auto-committing changes.
+#
+# Available environment variables:
+#   RALPH_WORKING_DIR   - Project working directory
+#   RALPH_HOOKS_DIR     - Path to .ralph/hooks/
+#   RALPH_PLAN_FILE     - Path to the plan file
+#   RALPH_FILES_CHANGED - Number of files that will be committed
+#
+# Exit codes:
+#   0 - Success (hook completed normally)
+#   Non-zero - Failure (logged as warning, loop continues)
+#
+# To enable this hook:
+#   mv pre-commit.sample pre-commit
+#   chmod +x pre-commit
+
+echo "About to commit $RALPH_FILES_CHANGED changed files..."

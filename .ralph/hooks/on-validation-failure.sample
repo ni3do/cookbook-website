@@ -1,0 +1,25 @@
+#!/bin/bash
+# ralph-loop hook: on-validation-failure
+# Runs when validation checks fail.
+#
+# Available environment variables:
+#   RALPH_WORKING_DIR           - Project working directory
+#   RALPH_HOOKS_DIR             - Path to .ralph/hooks/
+#   RALPH_PLAN_FILE             - Path to the plan file
+#   RALPH_VALIDATION_STATUS     - "failed"
+#   RALPH_VALIDATION_PASSED_COUNT - Number of checks that passed
+#   RALPH_VALIDATION_FAILED_COUNT - Number of checks that failed
+#
+# Exit codes:
+#   0 - Success (hook completed normally)
+#   Non-zero - Failure (logged as warning, loop continues)
+#
+# To enable this hook:
+#   mv on-validation-failure.sample on-validation-failure
+#   chmod +x on-validation-failure
+
+echo "Validation failed: $RALPH_VALIDATION_FAILED_COUNT checks failed"
+
+# Example: Send a notification
+# curl -X POST "https://hooks.slack.com/..." \
+#   -d "{\"text\": \"Validation failed: $RALPH_VALIDATION_FAILED_COUNT checks failed\"}"

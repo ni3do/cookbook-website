@@ -1,0 +1,18 @@
+#!/bin/bash
+# ralph-loop hook: pre-validation
+# Runs before validation checks start.
+#
+# Available environment variables:
+#   RALPH_WORKING_DIR   - Project working directory
+#   RALPH_HOOKS_DIR     - Path to .ralph/hooks/
+#   RALPH_PLAN_FILE     - Path to the plan file
+#
+# Exit codes:
+#   0 - Success (hook completed normally)
+#   Non-zero - Failure (logged as warning, loop continues)
+#
+# To enable this hook:
+#   mv pre-validation.sample pre-validation
+#   chmod +x pre-validation
+
+echo "Starting validation checks..."

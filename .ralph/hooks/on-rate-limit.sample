@@ -1,0 +1,26 @@
+#!/bin/bash
+# ralph-loop hook: on-rate-limit
+# Runs when a usage limit is encountered.
+#
+# Available environment variables:
+#   RALPH_WORKING_DIR     - Project working directory
+#   RALPH_HOOKS_DIR       - Path to .ralph/hooks/
+#   RALPH_PLAN_FILE       - Path to the plan file
+#   RALPH_LIMIT_TYPE      - Type of limit hit (e.g., "5-hour", "rate_limit")
+#   RALPH_LIMIT_RESETS_AT - ISO timestamp when limit resets (if known)
+#   RALPH_WAIT_SECONDS    - Seconds the loop will wait before retrying
+#
+# Exit codes:
+#   0 - Success (hook completed normally)
+#   Non-zero - Failure (logged as warning, loop continues)
+#
+# To enable this hook:
+#   mv on-rate-limit.sample on-rate-limit
+#   chmod +x on-rate-limit
+
+echo "Rate limit hit: $RALPH_LIMIT_TYPE"
+echo "Waiting $RALPH_WAIT_SECONDS seconds until retry..."
+
+# Example: Send a notification
+# curl -X POST "https://hooks.slack.com/..." \
+#   -d "{\"text\": \"Rate limit hit. Waiting $RALPH_WAIT_SECONDS seconds.\"}"

@@ -1,0 +1,21 @@
+#!/bin/bash
+# ralph-loop hook: post-validation
+# Runs after validation checks complete.
+#
+# Available environment variables:
+#   RALPH_WORKING_DIR             - Project working directory
+#   RALPH_HOOKS_DIR               - Path to .ralph/hooks/
+#   RALPH_PLAN_FILE               - Path to the plan file
+#   RALPH_VALIDATION_STATUS       - "passed" or "failed"
+#   RALPH_VALIDATION_PASSED_COUNT - Number of checks that passed
+#   RALPH_VALIDATION_FAILED_COUNT - Number of checks that failed
+#
+# Exit codes:
+#   0 - Success (hook completed normally)
+#   Non-zero - Failure (logged as warning, loop continues)
+#
+# To enable this hook:
+#   mv post-validation.sample post-validation
+#   chmod +x post-validation
+
+echo "Validation $RALPH_VALIDATION_STATUS: $RALPH_VALIDATION_PASSED_COUNT passed, $RALPH_VALIDATION_FAILED_COUNT failed"

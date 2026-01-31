@@ -1,0 +1,25 @@
+# Implementation plan
+IMPLEMENTATION_PLAN.md
+
+# Build output
+dist/
+
+# Dependencies
+node_modules/
+
+# Astro
+.astro/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
