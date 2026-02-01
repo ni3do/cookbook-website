@@ -139,11 +139,13 @@
         </div>
       </div>
 
-      {/* Share/Copy buttons placeholder for future Phase 1.5 */}
-      <div class="share-section mt-3 hidden">
+      {/* Share/Copy buttons */}
+      <div class="share-section mt-3 flex gap-2">
+        {/* Share button - uses Web Share API on supported devices */}
         <button
           type="button"
-          class="copy-list-btn w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-ctp-teal text-ctp-base font-medium hover:bg-ctp-teal/90 transition-colors"
+          class="share-list-btn flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-ctp-blue text-ctp-base font-medium hover:bg-ctp-blue/90 transition-colors"
+          aria-label="Share shopping list"
         >
           <svg
             class="w-5 h-5"
@@ -155,11 +157,52 @@
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
+              d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+            ></path>
+          </svg>
+          <span>Share</span>
+        </button>
+
+        {/* Copy to clipboard button */}
+        <button
+          type="button"
+          class="copy-list-btn flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-ctp-teal text-ctp-base font-medium hover:bg-ctp-teal/90 transition-colors"
+          aria-label="Copy shopping list to clipboard"
+        >
+          <svg
+            class="copy-icon w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
               d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
             ></path>
           </svg>
-          <span>Copy to Clipboard</span>
+          {/* Checkmark icon for success state */}
+          <svg
+            class="check-icon w-5 h-5 hidden"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M5 13l4 4L19 7"
+            ></path>
+          </svg>
+          <span class="copy-text">Copy</span>
         </button>
+      </div>
+
+      {/* Success toast - shown after share/copy */}
+      <div class="share-toast hidden mt-2 px-3 py-2 rounded-lg bg-ctp-green/20 text-ctp-green text-sm text-center font-medium">
+        <span class="toast-message">Copied to clipboard!</span>
       </div>
     </div>
   </div>
@@ -210,8 +253,123 @@
     const clearConfirm = drawer.querySelector('.clear-confirm');
     const confirmClearBtn = drawer.querySelector('.confirm-clear-btn');
     const cancelClearBtn = drawer.querySelector('.cancel-clear-btn');
+    const shareBtn = drawer.querySelector('.share-list-btn');
+    const copyBtn = drawer.querySelector('.copy-list-btn');
+    const copyIcon = copyBtn?.querySelector('.copy-icon');
+    const checkIcon = copyBtn?.querySelector('.check-icon');
+    const copyText = copyBtn?.querySelector('.copy-text');
+    const shareToast = drawer.querySelector('.share-toast');
+    const toastMessage = shareToast?.querySelector('.toast-message');
 
     let checkedItems = getCheckedItems();
+
+    /**
+     * Formats the shopping list as plain text for sharing/copying.
+     * Each ingredient is on its own line.
+     */
+    function getListAsText(): string {
+      const items = getShoppingList();
+      if (items.length === 0) return '';
+
+      const merged = mergeIngredients(items);
+      const lines = merged.map((ingredient) => formatMergedIngredient(ingredient));
+
+      return 'Shopping List:\n' + lines.map((line) => `• ${line}`).join('\n');
+    }
+
+    /**
+     * Shows a temporary toast notification.
+     */
+    function showToast(message: string, duration = 2000): void {
+      if (!shareToast || !toastMessage) return;
+
+      toastMessage.textContent = message;
+      shareToast.classList.remove('hidden');
+
+      setTimeout(() => {
+        shareToast.classList.add('hidden');
+      }, duration);
+    }
+
+    /**
+     * Shows success state on the copy button temporarily.
+     */
+    function showCopySuccess(): void {
+      if (!copyIcon || !checkIcon || !copyText) return;
+
+      copyIcon.classList.add('hidden');
+      checkIcon.classList.remove('hidden');
+      copyText.textContent = 'Copied!';
+
+      setTimeout(() => {
+        copyIcon.classList.remove('hidden');
+        checkIcon.classList.add('hidden');
+        copyText.textContent = 'Copy';
+      }, 2000);
+    }
+
+    /**
+     * Handles the share button click using Web Share API.
+     */
+    async function handleShare(): Promise<void> {
+      const text = getListAsText();
+      if (!text) {
+        showToast('Shopping list is empty');
+        return;
+      }
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: 'Shopping List',
+            text: text,
+          });
+          showToast('Shared successfully!');
+        } catch (err) {
+          // User cancelled or error - only show error if not user cancellation
+          if (err instanceof Error && err.name !== 'AbortError') {
+            // Fall back to copy
+            await handleCopy();
+          }
+        }
+      } else {
+        // Web Share API not supported - fall back to copy
+        await handleCopy();
+      }
+    }
+
+    /**
+     * Handles the copy button click using Clipboard API.
+     */
+    async function handleCopy(): Promise<void> {
+      const text = getListAsText();
+      if (!text) {
+        showToast('Shopping list is empty');
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(text);
+        showCopySuccess();
+        showToast('Copied to clipboard!');
+      } catch (err) {
+        // Fallback for older browsers
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+          document.execCommand('copy');
+          showCopySuccess();
+          showToast('Copied to clipboard!');
+        } catch {
+          showToast('Failed to copy');
+        }
+        document.body.removeChild(textarea);
+      }
+    }
 
     function openDrawer() {
       drawer.classList.remove('hidden');
@@ -337,6 +495,10 @@
       renderList();
       resetClearConfirm();
     });
+
+    // Share/Copy functionality
+    shareBtn?.addEventListener('click', handleShare);
+    copyBtn?.addEventListener('click', handleCopy);
 
     // Keyboard handling
     function handleKeyDown(e: KeyboardEvent) {
