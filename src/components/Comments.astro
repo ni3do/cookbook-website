@@ -1,4 +1,7 @@
 ---
+import Skeleton from './Skeleton.astro';
+import ErrorMessage from './ErrorMessage.astro';
+
 interface Props {
   slug: string;
 }
@@ -101,37 +104,21 @@ const { slug } = Astro.props;
     </div>
   </form>
 
-  {/* Comments List */}
-  <div class="comments-list space-y-4">
-    {/* Loading State */}
-    <div class="comments-loading flex items-center justify-center py-8 text-ctp-subtext0">
-      <svg class="w-5 h-5 animate-spin mr-2" fill="none" viewBox="0 0 24 24">
-        <circle
-          class="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          stroke-width="4"
-        ></circle>
-        <path
-          class="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-        ></path>
-      </svg>
-      Loading comments...
+  {/* Comments List - aria-live for screen reader announcements */}
+  <div class="comments-list space-y-4" aria-live="polite" aria-relevant="additions">
+    {/* Loading State - Skeleton placeholders */}
+    <div class="comments-loading space-y-4">
+      <Skeleton variant="comment" />
+      <Skeleton variant="comment" />
     </div>
 
     {/* Error State */}
-    <div class="comments-error hidden text-center py-8">
-      <p class="text-ctp-red mb-2">Failed to load comments</p>
-      <button
-        type="button"
-        class="retry-comments-btn text-sm text-ctp-lavender hover:underline"
-      >
-        Try again
-      </button>
+    <div class="comments-error hidden">
+      <ErrorMessage
+        message="Failed to load comments"
+        retryId="retry-comments-btn"
+        retryLabel="Try again"
+      />
     </div>
 
     {/* Empty State */}
@@ -217,7 +204,7 @@ const { slug } = Astro.props;
       const submitBtn = section.querySelector('.comment-submit-btn') as HTMLButtonElement;
       const submitText = section.querySelector('.submit-text') as HTMLElement;
       const submitSpinner = section.querySelector('.submit-spinner') as HTMLElement;
-      const retryBtn = section.querySelector('.retry-comments-btn') as HTMLButtonElement;
+      const retryBtn = section.querySelector('#retry-comments-btn') as HTMLButtonElement;
 
       let comments: Comment[] = [];
 

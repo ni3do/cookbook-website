@@ -1,0 +1,91 @@
+---
+/**
+ * Skeleton loading placeholder component
+ *
+ * Usage examples:
+ *   <Skeleton class="h-4 w-3/4" />           - Text line
+ *   <Skeleton class="h-40 rounded-xl" />      - Card image
+ *   <Skeleton variant="text" />               - Default text skeleton
+ *   <Skeleton variant="avatar" />             - Circular avatar
+ *   <Skeleton variant="card" />               - Full recipe card
+ */
+interface Props {
+  class?: string;
+  variant?: 'text' | 'avatar' | 'button' | 'card' | 'comment';
+}
+
+const { class: className = '', variant } = Astro.props;
+
+// Preset variants for common use cases
+const variantClasses: Record<string, string> = {
+  text: 'h-4 w-3/4 rounded',
+  avatar: 'h-10 w-10 rounded-full',
+  button: 'h-10 w-24 rounded-lg',
+  card: '', // Handled separately with nested elements
+  comment: '', // Handled separately with nested elements
+};
+
+const baseClass = variant && variant !== 'card' && variant !== 'comment' ? variantClasses[variant] : '';
+---
+
+{variant === 'card' ? (
+  <div class:list={['skeleton-card bg-ctp-surface0 rounded-2xl overflow-hidden border border-ctp-surface1', className]}>
+    {/* Image placeholder */}
+    <div class="skeleton-pulse aspect-[4/3] bg-ctp-surface1"></div>
+    {/* Content */}
+    <div class="p-4 space-y-3">
+      {/* Title */}
+      <div class="skeleton-pulse h-5 w-4/5 rounded bg-ctp-surface1"></div>
+      {/* Time and rating row */}
+      <div class="flex items-center justify-between">
+        <div class="skeleton-pulse h-4 w-16 rounded bg-ctp-surface1"></div>
+        <div class="skeleton-pulse h-4 w-12 rounded bg-ctp-surface1"></div>
+      </div>
+      {/* Tags */}
+      <div class="flex gap-1.5">
+        <div class="skeleton-pulse h-5 w-14 rounded-full bg-ctp-surface1"></div>
+        <div class="skeleton-pulse h-5 w-16 rounded-full bg-ctp-surface1"></div>
+        <div class="skeleton-pulse h-5 w-12 rounded-full bg-ctp-surface1"></div>
+      </div>
+    </div>
+  </div>
+) : variant === 'comment' ? (
+  <div class:list={['skeleton-comment bg-ctp-surface0 rounded-xl p-4 border border-ctp-surface1', className]}>
+    {/* Header row */}
+    <div class="flex items-center justify-between mb-3">
+      <div class="skeleton-pulse h-4 w-24 rounded bg-ctp-surface1"></div>
+      <div class="skeleton-pulse h-3 w-20 rounded bg-ctp-surface1"></div>
+    </div>
+    {/* Content lines */}
+    <div class="space-y-2">
+      <div class="skeleton-pulse h-3 w-full rounded bg-ctp-surface1"></div>
+      <div class="skeleton-pulse h-3 w-5/6 rounded bg-ctp-surface1"></div>
+      <div class="skeleton-pulse h-3 w-2/3 rounded bg-ctp-surface1"></div>
+    </div>
+  </div>
+) : (
+  <div class:list={['skeleton-pulse bg-ctp-surface1', baseClass, className]}></div>
+)}
+
+<style>
+  .skeleton-pulse {
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes skeleton-pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  /* Reduce motion for users who prefer it */
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton-pulse {
+      animation: none;
+      opacity: 0.7;
+    }
+  }
+</style>

@@ -198,7 +198,14 @@ const aggregateRating =
     <div
       class="relative aspect-[16/9] md:aspect-[21/9] rounded-2xl overflow-hidden bg-ctp-surface0"
     >
-      <img src={imagePath} alt={title} class="w-full h-full object-cover" />
+      <img
+        src={imagePath}
+        alt={title}
+        class="w-full h-full object-cover"
+        loading="eager"
+        decoding="async"
+        fetchpriority="high"
+      />
     </div>
   </div>
 

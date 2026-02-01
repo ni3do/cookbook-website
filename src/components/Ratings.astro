@@ -7,8 +7,8 @@ const { slug } = Astro.props;
 ---
 
 <div class="ratings-section" data-slug={slug}>
-  {/* Current Rating Display */}
-  <div class="rating-display flex items-center gap-3 mb-4">
+  {/* Current Rating Display - aria-live for screen reader announcements */}
+  <div class="rating-display flex items-center gap-3 mb-4" aria-live="polite">
     <div class="rating-stars flex items-center gap-0.5" aria-label="Current rating">
       {[1, 2, 3, 4, 5].map((star) => (
         <svg
