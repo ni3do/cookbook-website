@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ServingsScaler from '../../components/ServingsScaler.astro';
 import CookMode from '../../components/CookMode.astro';
+import AddToShoppingListButton from '../../components/AddToShoppingListButton.astro';
 import { getCollection, type CollectionEntry } from 'astro:content';
 
 // Prerender all recipe pages at build time
@@ -107,6 +108,9 @@ const stepsSections = parsedContent.filter((s) => s.type === 'steps');
 
 // Flatten all steps into a single array for cook mode
 const allSteps = stepsSections.flatMap((section) => section.items);
+
+// Flatten all ingredients into a single array for shopping list
+const allIngredients = ingredientSections.flatMap((section) => section.items);
 ---
 
 <BaseLayout
@@ -340,6 +344,15 @@ const allSteps = stepsSections.flatMap((section) => section.items);
                   </ul>
                 </div>
               ))
+            }
+
+            {/* Add to Shopping List Button */}
+            {
+              allIngredients.length > 0 && (
+                <div class="mt-6 pt-4 border-t border-ctp-surface1">
+                  <AddToShoppingListButton slug={slug} ingredients={allIngredients} />
+                </div>
+              )
             }
           </div>
         </div>

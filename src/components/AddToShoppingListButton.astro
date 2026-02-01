@@ -1,0 +1,160 @@
+---
+interface Props {
+  slug: string;
+  ingredients: string[];
+}
+
+const { slug, ingredients } = Astro.props;
+
+// Serialize ingredients as JSON for the client script
+const ingredientsJson = JSON.stringify(ingredients);
+---
+
+<div
+  class="add-to-shopping-list"
+  data-slug={slug}
+  data-ingredients={ingredientsJson}
+>
+  <button
+    type="button"
+    class="shopping-list-btn inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-ctp-teal text-ctp-base font-medium transition-all hover:bg-ctp-teal/90 hover:scale-105"
+    aria-label="Add ingredients to shopping list"
+  >
+    {/* Cart icon with plus */}
+    <svg
+      class="shopping-list-icon-add w-5 h-5"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      stroke-width="2"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+      ></path>
+    </svg>
+    {/* Check icon (shown when added) */}
+    <svg
+      class="shopping-list-icon-check w-5 h-5 hidden"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      stroke-width="2"
+    >
+      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"
+      ></path>
+    </svg>
+    <span class="shopping-list-text">Add to Shopping List</span>
+  </button>
+</div>
+
+<script>
+  import { parseIngredient } from '../utils/ingredientParser';
+  import {
+    addToShoppingList,
+    isRecipeInShoppingList,
+    removeFromShoppingList,
+  } from '../utils/shoppingList';
+
+  function initAddToShoppingListButtons() {
+    const containers = document.querySelectorAll('.add-to-shopping-list');
+
+    containers.forEach((container) => {
+      const slug = (container as HTMLElement).dataset.slug;
+      const ingredientsJson = (container as HTMLElement).dataset.ingredients;
+      const btn = container.querySelector(
+        '.shopping-list-btn'
+      ) as HTMLButtonElement;
+      const iconAdd = container.querySelector('.shopping-list-icon-add');
+      const iconCheck = container.querySelector('.shopping-list-icon-check');
+      const textEl = container.querySelector('.shopping-list-text');
+
+      if (
+        !slug ||
+        !ingredientsJson ||
+        !btn ||
+        !iconAdd ||
+        !iconCheck ||
+        !textEl
+      )
+        return;
+
+      const ingredients: string[] = JSON.parse(ingredientsJson);
+
+      function updateButtonState() {
+        if (!slug) return;
+        const inList = isRecipeInShoppingList(slug);
+
+        if (inList) {
+          // Recipe is in the list - show "In Shopping List" state
+          btn.classList.remove('bg-ctp-teal', 'hover:bg-ctp-teal/90');
+          btn.classList.add('bg-ctp-green', 'hover:bg-ctp-green/90');
+          iconAdd.classList.add('hidden');
+          iconCheck.classList.remove('hidden');
+          textEl.textContent = 'In Shopping List';
+          btn.setAttribute('aria-label', 'Remove from shopping list');
+        } else {
+          // Recipe is not in the list - show "Add" state
+          btn.classList.add('bg-ctp-teal', 'hover:bg-ctp-teal/90');
+          btn.classList.remove('bg-ctp-green', 'hover:bg-ctp-green/90');
+          iconAdd.classList.remove('hidden');
+          iconCheck.classList.add('hidden');
+          textEl.textContent = 'Add to Shopping List';
+          btn.setAttribute('aria-label', 'Add ingredients to shopping list');
+        }
+      }
+
+      function handleClick() {
+        if (!slug) return;
+        const inList = isRecipeInShoppingList(slug);
+
+        if (inList) {
+          // Remove from list
+          removeFromShoppingList(slug);
+        } else {
+          // Parse and add ingredients
+          const parsedIngredients = ingredients.map((raw) => {
+            const parsed = parseIngredient(raw);
+            return {
+              ingredient: parsed.name,
+              amount: parsed.amount !== null ? String(parsed.amount) : '',
+              unit: parsed.unit,
+              raw,
+            };
+          });
+          addToShoppingList(slug, parsedIngredients);
+        }
+
+        updateButtonState();
+      }
+
+      // Initialize state
+      updateButtonState();
+
+      // Handle click
+      btn.addEventListener('click', handleClick);
+
+      // Listen for shopping list changes (from other tabs or components)
+      window.addEventListener('shoppinglistchange', () => {
+        updateButtonState();
+      });
+    });
+  }
+
+  // Initialize on page load
+  initAddToShoppingListButtons();
+
+  // Re-initialize when navigating with View Transitions
+  document.addEventListener('astro:page-load', initAddToShoppingListButtons);
+</script>
+
+<style>
+  .shopping-list-btn {
+    transition: all 0.2s ease;
+  }
+
+  .shopping-list-btn:active {
+    transform: scale(0.98);
+  }
+</style>
