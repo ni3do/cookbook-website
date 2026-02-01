@@ -319,14 +319,20 @@ async function processImage(
 
 /**
  * Validates a scraped image path and returns the paths if valid.
- * Ensures the path is in the allowed scrape directory and exists on disk.
+ * Ensures the path is in the allowed submissions directory and exists on disk.
  */
 function validateScrapedImagePath(
   imagePath: string
 ): { imagePath: string; thumbnailPath: string } | null {
-  // Only allow paths from the scrape directory
-  const allowedPrefix = '/images/scrape/';
+  // Only allow paths from the submissions directory (scraped images use scrape- prefix)
+  const allowedPrefix = '/images/submissions/';
   if (!imagePath.startsWith(allowedPrefix)) {
+    return null;
+  }
+
+  // Only allow scraped images (must have scrape- prefix in filename)
+  const filename = path.basename(imagePath);
+  if (!filename.startsWith('scrape-')) {
     return null;
   }
 
