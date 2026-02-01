@@ -1,0 +1,435 @@
+---
+/**
+ * Shopping List Drawer Component
+ *
+ * A slide-in drawer from the right side that displays the merged shopping list
+ * with checkboxes for each ingredient. Supports clearing all items and
+ * closes on click-outside or escape key.
+ */
+---
+
+{/* Shopping List Drawer - initially hidden */}
+<div class="shopping-list-drawer hidden" aria-hidden="true">
+  {/* Backdrop overlay */}
+  <div
+    class="drawer-backdrop fixed inset-0 z-40 bg-ctp-crust/60 backdrop-blur-sm"
+  >
+  </div>
+
+  {/* Drawer panel */}
+  <div
+    class="drawer-panel fixed top-0 right-0 z-50 h-full w-full max-w-md bg-ctp-base border-l border-ctp-surface1 shadow-2xl flex flex-col"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="drawer-title"
+  >
+    {/* Header */}
+    <div
+      class="flex items-center justify-between px-6 py-4 border-b border-ctp-surface1"
+    >
+      <div class="flex items-center gap-3">
+        <svg
+          class="w-6 h-6 text-ctp-teal"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+          ></path>
+        </svg>
+        <h2 id="drawer-title" class="text-lg font-semibold text-ctp-text">
+          Shopping List
+        </h2>
+        <span
+          class="item-count px-2 py-0.5 text-sm rounded-full bg-ctp-surface0 text-ctp-subtext1"
+        ></span>
+      </div>
+
+      <button
+        type="button"
+        class="close-drawer p-2 rounded-full bg-ctp-surface0 hover:bg-ctp-surface1 transition-colors"
+        aria-label="Close shopping list"
+      >
+        <svg
+          class="w-5 h-5 text-ctp-text"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    {/* Content - scrollable list */}
+    <div class="flex-1 overflow-y-auto px-6 py-4">
+      {/* Empty state */}
+      <div class="empty-state hidden text-center py-12">
+        <svg
+          class="w-16 h-16 mx-auto text-ctp-overlay0 mb-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
+          ></path>
+        </svg>
+        <p class="text-ctp-subtext1 text-lg mb-2">Your shopping list is empty</p>
+        <p class="text-ctp-overlay0 text-sm">
+          Add ingredients from any recipe to get started
+        </p>
+      </div>
+
+      {/* Ingredient list */}
+      <ul class="ingredient-list space-y-2"></ul>
+    </div>
+
+    {/* Footer with actions */}
+    <div
+      class="drawer-footer border-t border-ctp-surface1 px-6 py-4 bg-ctp-mantle"
+    >
+      {/* Clear All button with confirmation */}
+      <div class="clear-section">
+        <button
+          type="button"
+          class="clear-all-btn w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-ctp-surface0 hover:bg-ctp-red/20 hover:text-ctp-red text-ctp-subtext1 font-medium transition-all"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            ></path>
+          </svg>
+          <span>Clear All</span>
+        </button>
+
+        {/* Confirmation state (hidden by default) */}
+        <div class="clear-confirm hidden flex gap-2">
+          <button
+            type="button"
+            class="confirm-clear-btn flex-1 px-4 py-2.5 rounded-xl bg-ctp-red text-ctp-base font-medium hover:bg-ctp-red/90 transition-colors"
+          >
+            Yes, clear all
+          </button>
+          <button
+            type="button"
+            class="cancel-clear-btn flex-1 px-4 py-2.5 rounded-xl bg-ctp-surface0 text-ctp-text font-medium hover:bg-ctp-surface1 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+
+      {/* Share/Copy buttons placeholder for future Phase 1.5 */}
+      <div class="share-section mt-3 hidden">
+        <button
+          type="button"
+          class="copy-list-btn w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-ctp-teal text-ctp-base font-medium hover:bg-ctp-teal/90 transition-colors"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
+            ></path>
+          </svg>
+          <span>Copy to Clipboard</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import {
+    getShoppingList,
+    clearShoppingList,
+    getShoppingListItemCount,
+  } from '../utils/shoppingList';
+  import {
+    mergeIngredients,
+    formatMergedIngredient,
+  } from '../utils/ingredientParser';
+
+  const CHECKED_ITEMS_KEY = 'shopping-list-checked';
+
+  function getCheckedItems(): Set<string> {
+    try {
+      const stored = localStorage.getItem(CHECKED_ITEMS_KEY);
+      if (stored) {
+        return new Set(JSON.parse(stored));
+      }
+    } catch {
+      // Ignore parse errors
+    }
+    return new Set();
+  }
+
+  function saveCheckedItems(items: Set<string>): void {
+    localStorage.setItem(CHECKED_ITEMS_KEY, JSON.stringify([...items]));
+  }
+
+  function initShoppingListDrawer() {
+    const drawer = document.querySelector('.shopping-list-drawer');
+    if (!drawer) return;
+
+    const backdrop = drawer.querySelector('.drawer-backdrop');
+    const panel = drawer.querySelector('.drawer-panel');
+    const closeBtn = drawer.querySelector('.close-drawer');
+    const emptyState = drawer.querySelector('.empty-state');
+    const ingredientList = drawer.querySelector('.ingredient-list');
+    const itemCountEl = drawer.querySelector('.item-count');
+    const drawerFooter = drawer.querySelector('.drawer-footer');
+    const clearAllBtn = drawer.querySelector('.clear-all-btn');
+    const clearSection = drawer.querySelector('.clear-section');
+    const clearConfirm = drawer.querySelector('.clear-confirm');
+    const confirmClearBtn = drawer.querySelector('.confirm-clear-btn');
+    const cancelClearBtn = drawer.querySelector('.cancel-clear-btn');
+
+    let checkedItems = getCheckedItems();
+
+    function openDrawer() {
+      drawer.classList.remove('hidden');
+      drawer.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      renderList();
+      // Focus trap - focus the close button
+      (closeBtn as HTMLElement)?.focus();
+    }
+
+    function closeDrawer() {
+      drawer.classList.add('hidden');
+      drawer.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      // Reset clear confirmation state
+      resetClearConfirm();
+    }
+
+    function resetClearConfirm() {
+      clearAllBtn?.classList.remove('hidden');
+      clearConfirm?.classList.add('hidden');
+    }
+
+    function showClearConfirm() {
+      clearAllBtn?.classList.add('hidden');
+      clearConfirm?.classList.remove('hidden');
+    }
+
+    function renderList() {
+      const items = getShoppingList();
+      const count = items.length;
+
+      // Update item count
+      if (itemCountEl) {
+        itemCountEl.textContent = count > 0 ? `${count} items` : '';
+      }
+
+      // Show/hide empty state and footer
+      if (count === 0) {
+        emptyState?.classList.remove('hidden');
+        ingredientList?.classList.add('hidden');
+        drawerFooter?.classList.add('hidden');
+      } else {
+        emptyState?.classList.add('hidden');
+        ingredientList?.classList.remove('hidden');
+        drawerFooter?.classList.remove('hidden');
+      }
+
+      // Clear and rebuild list
+      if (ingredientList) {
+        ingredientList.innerHTML = '';
+
+        // Merge duplicate ingredients
+        const merged = mergeIngredients(items);
+
+        merged.forEach((ingredient, index) => {
+          const itemId = `ingredient-${index}`;
+          const formattedText = formatMergedIngredient(ingredient);
+          const isChecked = checkedItems.has(formattedText);
+
+          const li = document.createElement('li');
+          li.className = 'ingredient-item';
+
+          li.innerHTML = `
+            <label class="flex items-start gap-3 p-3 rounded-xl bg-ctp-surface0 hover:bg-ctp-surface1 cursor-pointer transition-colors group ${isChecked ? 'opacity-60' : ''}">
+              <input
+                type="checkbox"
+                id="${itemId}"
+                class="ingredient-checkbox mt-0.5 w-5 h-5 rounded border-2 border-ctp-overlay0 text-ctp-teal focus:ring-ctp-teal focus:ring-offset-0 bg-transparent cursor-pointer"
+                ${isChecked ? 'checked' : ''}
+                data-ingredient="${formattedText}"
+              />
+              <span class="flex-1 ${isChecked ? 'line-through text-ctp-overlay0' : 'text-ctp-text'}">
+                ${formattedText}
+              </span>
+              ${
+                ingredient.recipeSlugs.length > 1
+                  ? `<span class="text-xs text-ctp-overlay0 px-2 py-0.5 rounded-full bg-ctp-surface1">${ingredient.recipeSlugs.length} recipes</span>`
+                  : ''
+              }
+            </label>
+          `;
+
+          // Add checkbox change handler
+          const checkbox = li.querySelector('.ingredient-checkbox') as HTMLInputElement;
+          const label = li.querySelector('label');
+          const span = li.querySelector('span.flex-1');
+
+          checkbox?.addEventListener('change', () => {
+            const ingredientName = checkbox.dataset.ingredient || '';
+
+            if (checkbox.checked) {
+              checkedItems.add(ingredientName);
+              label?.classList.add('opacity-60');
+              span?.classList.add('line-through', 'text-ctp-overlay0');
+              span?.classList.remove('text-ctp-text');
+            } else {
+              checkedItems.delete(ingredientName);
+              label?.classList.remove('opacity-60');
+              span?.classList.remove('line-through', 'text-ctp-overlay0');
+              span?.classList.add('text-ctp-text');
+            }
+
+            saveCheckedItems(checkedItems);
+          });
+
+          ingredientList.appendChild(li);
+        });
+      }
+    }
+
+    // Event listeners
+    closeBtn?.addEventListener('click', closeDrawer);
+    backdrop?.addEventListener('click', closeDrawer);
+
+    // Clear all functionality
+    clearAllBtn?.addEventListener('click', showClearConfirm);
+    cancelClearBtn?.addEventListener('click', resetClearConfirm);
+    confirmClearBtn?.addEventListener('click', () => {
+      clearShoppingList();
+      checkedItems.clear();
+      saveCheckedItems(checkedItems);
+      renderList();
+      resetClearConfirm();
+    });
+
+    // Keyboard handling
+    function handleKeyDown(e: KeyboardEvent) {
+      if (drawer.classList.contains('hidden')) return;
+
+      if (e.key === 'Escape') {
+        closeDrawer();
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Listen for shopping list changes
+    window.addEventListener('shoppinglistchange', () => {
+      if (!drawer.classList.contains('hidden')) {
+        renderList();
+      }
+    });
+
+    // Expose open method for external triggers (e.g., header cart icon)
+    (window as any).openShoppingListDrawer = openDrawer;
+
+    // Custom event for opening the drawer
+    window.addEventListener('openshoppinglist', openDrawer);
+  }
+
+  // Initialize on page load
+  initShoppingListDrawer();
+
+  // Re-initialize when navigating with View Transitions
+  document.addEventListener('astro:page-load', initShoppingListDrawer);
+</script>
+
+<style>
+  .drawer-backdrop {
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  .drawer-panel {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  /* Custom checkbox styling for Catppuccin theme */
+  .ingredient-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    display: grid;
+    place-content: center;
+  }
+
+  .ingredient-checkbox::before {
+    content: '';
+    width: 0.75rem;
+    height: 0.75rem;
+    transform: scale(0);
+    transition: transform 0.15s ease-in-out;
+    box-shadow: inset 1rem 1rem var(--color-teal);
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+  }
+
+  .ingredient-checkbox:checked::before {
+    transform: scale(1);
+  }
+
+  .ingredient-checkbox:checked {
+    border-color: var(--color-teal);
+  }
+
+  .ingredient-checkbox:focus {
+    outline: 2px solid var(--color-teal);
+    outline-offset: 2px;
+  }
+
+  /* Ensure smooth transitions for checked items */
+  .ingredient-item label,
+  .ingredient-item span {
+    transition: all 0.2s ease;
+  }
+</style>

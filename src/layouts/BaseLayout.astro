@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import '../styles/print.css';
 import Header from '../components/Header.astro';
+import ShoppingListDrawer from '../components/ShoppingListDrawer.astro';
 
 interface Props {
   title: string;
@@ -72,5 +73,6 @@ const canonicalURL = Astro.site
     <main>
       <slot />
     </main>
+    <ShoppingListDrawer />
   </body>
 </html>
