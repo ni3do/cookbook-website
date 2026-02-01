@@ -35,8 +35,12 @@ COPY --from=build /app/dist ./dist
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/package.json ./
 
-# Create data directory for SQLite
-RUN mkdir -p /app/data
+# Copy migrations and scripts for database setup
+COPY --from=build /app/migrations ./migrations
+COPY --from=build /app/scripts ./scripts
+
+# Create data directory and run migrations
+RUN mkdir -p /app/data && node scripts/migrate.js
 
 ENV HOST=0.0.0.0
 ENV PORT=4321
