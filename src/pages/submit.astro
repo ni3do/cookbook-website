@@ -970,6 +970,349 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     });
   }
 
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Import from URL functionality
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  const importUrlInput = document.getElementById('import_url') as HTMLInputElement;
+  const importBtn = document.getElementById('import-btn') as HTMLButtonElement;
+  const importIcon = document.getElementById('import-icon');
+  const importSpinner = document.getElementById('import-spinner');
+  const importBtnText = document.getElementById('import-btn-text');
+
+  // Modal elements
+  const ingredientReviewModal = document.getElementById('ingredient-review-modal');
+  const modalIngredientsList = document.getElementById('modal-ingredients-list');
+  const modalBackdrop = document.getElementById('modal-backdrop');
+  const modalCancel = document.getElementById('modal-cancel');
+  const modalConfirm = document.getElementById('modal-confirm');
+
+  // Stored scraped data for use after modal confirmation
+  let pendingScrapedData: ScrapedRecipeData | null = null;
+
+  /** Shape of scraped recipe data from the API */
+  interface ScrapedRecipeData {
+    title: string;
+    description?: string;
+    prepTime?: number;
+    cookTime?: number;
+    servings?: number;
+    ingredients: Array<{ amount: string; name: string; original?: string; converted?: boolean; confidence?: string }>;
+    steps: string[];
+    imagePath?: string;
+    thumbnailPath?: string;
+    sourceName?: string;
+    sourceUrl: string;
+  }
+
+  /**
+   * Toggles the import button loading state.
+   */
+  function setImportLoading(loading: boolean): void {
+    if (!importBtn || !importIcon || !importSpinner || !importBtnText) return;
+
+    importBtn.disabled = loading;
+
+    if (loading) {
+      importIcon.classList.add('hidden');
+      importSpinner.classList.remove('hidden');
+      importBtnText.textContent = 'Importing...';
+    } else {
+      importIcon.classList.remove('hidden');
+      importSpinner.classList.add('hidden');
+      importBtnText.textContent = 'Import';
+    }
+  }
+
+  /**
+   * Sets a form field value by its ID.
+   */
+  function setFieldValue(fieldId: string, value: string | number | undefined): void {
+    const field = document.getElementById(fieldId) as HTMLInputElement | HTMLTextAreaElement | null;
+    if (field && value !== undefined && value !== null) {
+      field.value = String(value);
+      // Trigger input event for any listeners (e.g., character counters)
+      field.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }
+
+  /**
+   * Populates the form with scraped recipe data.
+   */
+  function populateForm(data: ScrapedRecipeData): void {
+    // Basic fields
+    setFieldValue('title', data.title);
+    setFieldValue('description', data.description);
+    setFieldValue('prep_time', data.prepTime);
+    setFieldValue('cook_time', data.cookTime);
+    setFieldValue('servings', data.servings);
+
+    // Source attribution
+    setFieldValue('source_name', data.sourceName);
+    setFieldValue('source_url', data.sourceUrl);
+
+    // Populate ingredients
+    if (ingredientsContainer && data.ingredients.length > 0) {
+      ingredientsContainer.textContent = '';
+      ingredientIndex = 0;
+
+      data.ingredients.forEach((ingredient) => {
+        const row = createIngredientRow();
+        const amountInput = row.querySelector('input[name^="ingredient_amount_"]') as HTMLInputElement;
+        const nameInput = row.querySelector('input[name^="ingredient_name_"]') as HTMLInputElement;
+
+        if (amountInput) amountInput.value = ingredient.amount;
+        if (nameInput) nameInput.value = ingredient.name;
+
+        ingredientsContainer.appendChild(row);
+      });
+    }
+
+    // Populate steps
+    if (stepsContainer && data.steps.length > 0) {
+      stepsContainer.textContent = '';
+      stepIndex = 0;
+
+      data.steps.forEach((stepText) => {
+        const row = createStepRow();
+        const textarea = row.querySelector('textarea') as HTMLTextAreaElement;
+        if (textarea) textarea.value = stepText;
+        stepsContainer.appendChild(row);
+      });
+    }
+
+    // Handle image from scraping
+    if (data.imagePath && data.thumbnailPath) {
+      // Show preview using thumbnail
+      if (previewImg && uploadPlaceholder && imagePreview) {
+        previewImg.src = data.thumbnailPath;
+        uploadPlaceholder.classList.add('hidden');
+        imagePreview.classList.remove('hidden');
+      }
+
+      // Add hidden input for scraped image path
+      let scrapedImageInput = document.getElementById('scraped_image_path') as HTMLInputElement;
+      if (!scrapedImageInput) {
+        scrapedImageInput = document.createElement('input');
+        scrapedImageInput.type = 'hidden';
+        scrapedImageInput.id = 'scraped_image_path';
+        scrapedImageInput.name = 'scraped_image_path';
+        form?.appendChild(scrapedImageInput);
+      }
+      scrapedImageInput.value = data.imagePath;
+    }
+  }
+
+  /**
+   * Checks if any ingredients have low confidence conversions.
+   */
+  function hasLowConfidenceIngredients(data: ScrapedRecipeData): boolean {
+    return data.ingredients.some(
+      (ing) => ing.converted && (ing.confidence === 'low' || ing.confidence === 'medium')
+    );
+  }
+
+  /**
+   * Creates a warning icon SVG element.
+   */
+  function createWarningIcon(): SVGSVGElement {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'w-4 h-4 inline-block flex-shrink-0');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '2');
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('stroke-linecap', 'round');
+    path.setAttribute('stroke-linejoin', 'round');
+    path.setAttribute('d', 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z');
+
+    svg.appendChild(path);
+    return svg;
+  }
+
+  /**
+   * Creates a single ingredient review row for the modal using safe DOM methods.
+   */
+  function createReviewRow(ingredient: ScrapedRecipeData['ingredients'][0]): HTMLElement {
+    const row = document.createElement('div');
+    row.className = 'bg-ctp-base rounded-lg p-3 border border-ctp-surface1';
+
+    const original = ingredient.original || `${ingredient.amount} ${ingredient.name}`;
+    const converted = `${ingredient.amount} ${ingredient.name}`;
+
+    // Determine confidence styling
+    let confidenceClass = 'text-ctp-green';
+    const showWarning = ingredient.confidence === 'low' || ingredient.confidence === 'medium';
+
+    if (ingredient.confidence === 'low') {
+      confidenceClass = 'text-ctp-yellow';
+    } else if (ingredient.confidence === 'medium') {
+      confidenceClass = 'text-ctp-peach';
+    }
+
+    if (ingredient.converted) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'flex items-center justify-between gap-4';
+
+      const content = document.createElement('div');
+      content.className = 'flex-1';
+
+      const originalText = document.createElement('p');
+      originalText.className = 'text-sm text-ctp-overlay0 line-through';
+      originalText.textContent = original;
+
+      const convertedWrapper = document.createElement('p');
+      convertedWrapper.className = `text-sm ${confidenceClass} font-medium flex items-center gap-1`;
+
+      if (showWarning) {
+        convertedWrapper.appendChild(createWarningIcon());
+      }
+
+      const convertedText = document.createTextNode(converted);
+      convertedWrapper.appendChild(convertedText);
+
+      content.appendChild(originalText);
+      content.appendChild(convertedWrapper);
+      wrapper.appendChild(content);
+      row.appendChild(wrapper);
+    } else {
+      const text = document.createElement('div');
+      text.className = 'text-sm text-ctp-text';
+      text.textContent = original;
+      row.appendChild(text);
+    }
+
+    return row;
+  }
+
+  /**
+   * Shows the ingredient review modal.
+   */
+  function showIngredientReviewModal(data: ScrapedRecipeData): void {
+    if (!ingredientReviewModal || !modalIngredientsList) return;
+
+    // Store data for later use
+    pendingScrapedData = data;
+
+    // Clear existing rows using safe method
+    modalIngredientsList.textContent = '';
+
+    // Add ingredient rows
+    data.ingredients.forEach((ingredient) => {
+      modalIngredientsList.appendChild(createReviewRow(ingredient));
+    });
+
+    // Show modal
+    ingredientReviewModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  /**
+   * Closes the ingredient review modal.
+   */
+  function closeModal(): void {
+    if (!ingredientReviewModal) return;
+
+    ingredientReviewModal.classList.add('hidden');
+    document.body.style.overflow = '';
+    pendingScrapedData = null;
+  }
+
+  /**
+   * Handles the import button click - fetches and processes recipe data.
+   */
+  async function handleImport(): Promise<void> {
+    if (!importUrlInput) return;
+
+    const url = importUrlInput.value.trim();
+
+    if (!url) {
+      showMessage('Please enter a URL to import from', 'error');
+      return;
+    }
+
+    // Basic URL validation
+    try {
+      new URL(url);
+    } catch {
+      showMessage('Please enter a valid URL', 'error');
+      return;
+    }
+
+    setImportLoading(true);
+
+    try {
+      const response = await fetch(`/api/scrape?url=${encodeURIComponent(url)}`);
+      const result = await response.json();
+
+      if (!response.ok) {
+        const errorMsg = result.error || 'Failed to import recipe';
+        showMessage(errorMsg, 'error');
+        return;
+      }
+
+      const data = result as ScrapedRecipeData;
+
+      // Check if we need to show review modal for low confidence conversions
+      if (hasLowConfidenceIngredients(data)) {
+        showIngredientReviewModal(data);
+      } else {
+        // No review needed - populate directly
+        populateForm(data);
+        showMessage('Recipe imported successfully!', 'success');
+        importUrlInput.value = '';
+      }
+    } catch (error) {
+      console.error('Import error:', error);
+      showMessage('Network error. Please check your connection and try again.', 'error');
+    } finally {
+      setImportLoading(false);
+    }
+  }
+
+  // Event handlers for import functionality
+  if (importBtn) {
+    importBtn.addEventListener('click', handleImport);
+  }
+
+  if (importUrlInput) {
+    importUrlInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleImport();
+      }
+    });
+  }
+
+  // Modal event handlers
+  if (modalBackdrop) {
+    modalBackdrop.addEventListener('click', closeModal);
+  }
+
+  if (modalCancel) {
+    modalCancel.addEventListener('click', closeModal);
+  }
+
+  if (modalConfirm) {
+    modalConfirm.addEventListener('click', () => {
+      if (pendingScrapedData) {
+        populateForm(pendingScrapedData);
+        showMessage('Recipe imported successfully!', 'success');
+        if (importUrlInput) importUrlInput.value = '';
+      }
+      closeModal();
+    });
+  }
+
+  // Close modal on escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && ingredientReviewModal && !ingredientReviewModal.classList.contains('hidden')) {
+      closeModal();
+    }
+  });
+
   // Message display helper
   function showMessage(message: string, type: 'success' | 'error') {
     // Remove any existing message
