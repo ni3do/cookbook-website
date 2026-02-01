@@ -101,6 +101,7 @@ export const UNIT_ALIASES: Record<string, string> = {
   // Volume - tablespoon
   tablespoon: 'tbsp',
   tablespoons: 'tbsp',
+  tbsp: 'tbsp',
   T: 'tbsp',
   Tbsp: 'tbsp',
   'tbl.': 'tbsp',
@@ -109,6 +110,7 @@ export const UNIT_ALIASES: Record<string, string> = {
   // Volume - teaspoon
   teaspoon: 'tsp',
   teaspoons: 'tsp',
+  tsp: 'tsp',
   t: 'tsp',
   'tsp.': 'tsp',
 
@@ -574,6 +576,46 @@ function formatAmount(value: number): string {
 }
 
 /**
+ * Parses an amount string that may contain ranges or multiple values.
+ * Returns the primary value for conversion purposes.
+ *
+ * @example
+ * parseAmountValue('1.5')     // 1.5
+ * parseAmountValue('1-2')     // 1.5 (average)
+ * parseAmountValue('1 to 2')  // 1.5 (average)
+ */
+function parseAmountValue(amountStr: string): number | null {
+  // Handle ranges: "1-2" or "1 to 2"
+  const rangeMatch = amountStr.match(/^([\d.]+)\s*(?:-|to)\s*([\d.]+)$/i);
+  if (rangeMatch) {
+    const low = parseFloat(rangeMatch[1]);
+    const high = parseFloat(rangeMatch[2]);
+    if (!isNaN(low) && !isNaN(high)) {
+      // Return average for conversion
+      return (low + high) / 2;
+    }
+  }
+
+  // Simple number
+  const num = parseFloat(amountStr);
+  return isNaN(num) ? null : num;
+}
+
+/**
+ * Formats a range after conversion, preserving the range notation.
+ */
+function formatRange(amountStr: string, conversionFactor: number, suffix: string): string {
+  const rangeMatch = amountStr.match(/^([\d.]+)\s*(-|to)\s*([\d.]+)$/i);
+  if (rangeMatch) {
+    const low = parseFloat(rangeMatch[1]) * conversionFactor;
+    const high = parseFloat(rangeMatch[3]) * conversionFactor;
+    const sep = rangeMatch[2] === 'to' ? ' to ' : '-';
+    return `${formatAmount(low)}${sep}${formatAmount(high)}${suffix}`;
+  }
+  return `${formatAmount(parseFloat(amountStr) * conversionFactor)}${suffix}`;
+}
+
+/**
  * Converts an imperial measurement to metric.
  *
  * Conversion strategy:
@@ -653,4 +695,465 @@ export function convertToMetric(
     amount: `${formatAmount(amount)}${unit}`,
     confidence: 'low',
   };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Core Parsing Functions
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Regex to match amount at the start of an ingredient string.
+ * Matches: "1", "1.5", "1-2", "1 to 2", "1.5-2.5"
+ */
+const AMOUNT_REGEX = /^([\d.]+(?:\s*(?:-|to)\s*[\d.]+)?)\s*/i;
+
+/**
+ * Known units pattern for matching after the amount.
+ * This list covers common cooking units and their variations.
+ */
+const UNIT_PATTERN = [
+  // Volume - multi-word first
+  'fluid ounces?',
+  'fl\\.? oz\\.?',
+  // Volume - single word
+  'tablespoons?',
+  'teaspoons?',
+  'tbsp\\.?',
+  'tsp\\.?',
+  'cups?',
+  'pints?',
+  'quarts?',
+  'gallons?',
+  'liters?',
+  'litres?',
+  'milliliters?',
+  'millilitres?',
+  'ml',
+  'mL',
+  'pt\\.?',
+  'qt\\.?',
+  'gal\\.?',
+  // Weight
+  'ounces?',
+  'pounds?',
+  'oz\\.?',
+  'lbs?\\.?',
+  'grams?',
+  'kilograms?',
+  'kilos?',
+  'kg\\.?',
+  'g\\.?',
+  // Length
+  'inch(?:es)?',
+  'in\\.?',
+  '"',
+  // Short forms that might conflict - must match with word boundary
+  'T',
+  't',
+  'c',
+  'C',
+  'l',
+  'L',
+].join('|');
+
+const UNIT_REGEX = new RegExp(`^(${UNIT_PATTERN})(?:\\s+|$)`, 'i');
+
+/**
+ * Parses an ingredient string into structured data with metric conversion.
+ *
+ * @param text - Raw ingredient string (e.g., "1 cup all-purpose flour")
+ * @returns ParsedIngredient with original, converted amount, name, and confidence
+ *
+ * @example
+ * parseIngredient('1 cup flour')
+ * // { original: '1 cup flour', amount: '120g', name: 'flour', converted: true, confidence: 'high' }
+ *
+ * parseIngredient('2 tablespoons butter')
+ * // { original: '2 tablespoons butter', amount: '30g', name: 'butter', converted: true, confidence: 'high' }
+ *
+ * parseIngredient('Salt to taste')
+ * // { original: 'Salt to taste', amount: '', name: 'Salt to taste', converted: false, confidence: 'high' }
+ *
+ * parseIngredient('1-2 tbsp olive oil')
+ * // { original: '1-2 tbsp olive oil', amount: '15-30ml', name: 'olive oil', converted: true, confidence: 'high' }
+ */
+export function parseIngredient(text: string): ParsedIngredient {
+  const original = text.trim();
+
+  // Step 1: Normalize word numbers and fractions
+  let normalized = replaceWordNumbers(original);
+  normalized = replaceFractions(normalized);
+
+  // Step 2: Extract numeric amount
+  const amountMatch = normalized.match(AMOUNT_REGEX);
+
+  if (!amountMatch) {
+    // No amount found - return entire text as name
+    return {
+      original,
+      amount: '',
+      name: original,
+      converted: false,
+      confidence: 'high',
+    };
+  }
+
+  const amountStr = amountMatch[1].trim();
+  let remainder = normalized.slice(amountMatch[0].length).trim();
+
+  // Step 3: Extract unit
+  const unitMatch = remainder.match(UNIT_REGEX);
+  let unit: string | null = null;
+  let name = remainder;
+
+  if (unitMatch) {
+    const rawUnit = unitMatch[1];
+    unit = normalizeUnit(rawUnit);
+    name = remainder.slice(unitMatch[0].length).trim();
+  }
+
+  // Step 4: Convert imperial units to metric
+  if (unit && isImperialUnit(unit)) {
+    const numericAmount = parseAmountValue(amountStr);
+
+    if (numericAmount !== null) {
+      // Check if it's a range for special formatting
+      const isRange = /[-]|to/i.test(amountStr);
+
+      if (isRange) {
+        // Handle range conversion
+        const converted = convertToMetric(numericAmount, unit, name);
+        // Extract the conversion factor from the result
+        const convFactor = getConversionFactor(unit, name);
+        const suffix = converted.amount.replace(/[\d.\-\s]+/, '');
+
+        return {
+          original,
+          amount: formatRange(amountStr, convFactor, suffix),
+          name,
+          converted: true,
+          confidence: converted.confidence,
+        };
+      }
+
+      // Simple amount conversion
+      const converted = convertToMetric(numericAmount, unit, name);
+      return {
+        original,
+        amount: converted.amount,
+        name,
+        converted: true,
+        confidence: converted.confidence,
+      };
+    }
+  }
+
+  // Step 5: Already metric or no recognized unit
+  const finalAmount = unit ? `${amountStr}${unit}` : amountStr;
+
+  return {
+    original,
+    amount: finalAmount,
+    name,
+    converted: false,
+    confidence: 'high',
+  };
+}
+
+/**
+ * Gets the conversion factor for a unit (used for range formatting).
+ */
+function getConversionFactor(unit: string, ingredientName: string): number {
+  // Weight conversions
+  if (unit in WEIGHT_TO_G) {
+    return WEIGHT_TO_G[unit];
+  }
+
+  // Length conversions
+  if (unit in LENGTH_TO_CM) {
+    return LENGTH_TO_CM[unit];
+  }
+
+  // Volume conversions
+  if (unit in VOLUME_TO_ML) {
+    const mlPerUnit = VOLUME_TO_ML[unit];
+    const density = findIngredientDensity(ingredientName);
+
+    if (density) {
+      // Convert to grams using density
+      const cupsEquivalent = mlPerUnit / 240;
+      return cupsEquivalent * density;
+    }
+
+    // Convert to ml
+    return mlPerUnit;
+  }
+
+  return 1;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// JSON-LD Extraction
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Schema.org Recipe type (subset of fields we care about) */
+interface SchemaRecipe {
+  '@type': string | string[];
+  name?: string;
+  description?: string;
+  prepTime?: string;
+  cookTime?: string;
+  totalTime?: string;
+  recipeYield?: string | number | string[];
+  recipeIngredient?: string[];
+  recipeInstructions?: SchemaInstruction[] | string[] | string;
+  image?: string | string[] | { url: string } | { url: string }[];
+}
+
+/** Schema.org HowToStep or HowToSection */
+interface SchemaInstruction {
+  '@type'?: string;
+  text?: string;
+  name?: string;
+  itemListElement?: (SchemaInstruction | string)[];
+}
+
+/**
+ * Extracts a Schema.org Recipe from HTML using JSON-LD.
+ *
+ * Handles:
+ * - Single Recipe objects
+ * - @graph arrays containing Recipe
+ * - Multiple JSON-LD script tags
+ * - Various image formats (string, array, object)
+ * - HowToStep and HowToSection instructions
+ *
+ * @param html - Raw HTML string to parse
+ * @returns ScrapedRecipe if found, null otherwise
+ *
+ * @example
+ * const html = await fetch(url).then(r => r.text());
+ * const recipe = extractJsonLd(html);
+ * if (recipe) {
+ *   console.log(recipe.title); // "Lemon Pasta"
+ * }
+ */
+export function extractJsonLd(html: string): Omit<ScrapedRecipe, 'sourceUrl'> | null {
+  // Find all JSON-LD script tags
+  const jsonLdRegex = /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+  let match;
+
+  while ((match = jsonLdRegex.exec(html)) !== null) {
+    try {
+      const jsonText = match[1].trim();
+      const data = JSON.parse(jsonText);
+
+      // Try to find a Recipe in this JSON-LD block
+      const recipe = findRecipeInJsonLd(data);
+      if (recipe) {
+        return parseSchemaRecipe(recipe);
+      }
+    } catch {
+      // Invalid JSON, try next script tag
+      continue;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Recursively searches for a Recipe object in JSON-LD data.
+ */
+function findRecipeInJsonLd(data: unknown): SchemaRecipe | null {
+  if (!data || typeof data !== 'object') {
+    return null;
+  }
+
+  // Check if this object is a Recipe
+  if (isRecipeType(data)) {
+    return data as SchemaRecipe;
+  }
+
+  // Check @graph array
+  if ('@graph' in data && Array.isArray((data as { '@graph': unknown[] })['@graph'])) {
+    for (const item of (data as { '@graph': unknown[] })['@graph']) {
+      if (isRecipeType(item)) {
+        return item as SchemaRecipe;
+      }
+    }
+  }
+
+  // Check if it's an array at the root
+  if (Array.isArray(data)) {
+    for (const item of data) {
+      const recipe = findRecipeInJsonLd(item);
+      if (recipe) {
+        return recipe;
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Checks if an object has @type of "Recipe".
+ */
+function isRecipeType(obj: unknown): boolean {
+  if (!obj || typeof obj !== 'object') {
+    return false;
+  }
+
+  const typed = obj as { '@type'?: string | string[] };
+  if (!typed['@type']) {
+    return false;
+  }
+
+  const types = Array.isArray(typed['@type']) ? typed['@type'] : [typed['@type']];
+  return types.some((t) => t === 'Recipe' || t === 'https://schema.org/Recipe');
+}
+
+/**
+ * Converts a Schema.org Recipe to our ScrapedRecipe format.
+ */
+function parseSchemaRecipe(schema: SchemaRecipe): Omit<ScrapedRecipe, 'sourceUrl'> {
+  return {
+    title: schema.name || 'Untitled Recipe',
+    description: schema.description,
+    prepTime: parseDuration(schema.prepTime),
+    cookTime: parseDuration(schema.cookTime),
+    servings: parseServings(schema.recipeYield),
+    ingredients: parseIngredients(schema.recipeIngredient),
+    steps: parseInstructions(schema.recipeInstructions),
+    imageUrl: parseImageUrl(schema.image),
+  };
+}
+
+/**
+ * Parses recipeYield to a number of servings.
+ */
+function parseServings(yield_: string | number | string[] | undefined): number | undefined {
+  if (yield_ === undefined) {
+    return undefined;
+  }
+
+  // Handle array (take first)
+  if (Array.isArray(yield_)) {
+    return parseServings(yield_[0]);
+  }
+
+  // Handle number directly
+  if (typeof yield_ === 'number') {
+    return yield_;
+  }
+
+  // Handle string - extract first number
+  const match = yield_.match(/(\d+)/);
+  return match ? parseInt(match[1], 10) : undefined;
+}
+
+/**
+ * Parses recipeIngredient array with metric conversion.
+ */
+function parseIngredients(
+  ingredients: string[] | undefined
+): Array<{ amount: string; name: string }> {
+  if (!ingredients || !Array.isArray(ingredients)) {
+    return [];
+  }
+
+  return ingredients.map((text) => {
+    const parsed = parseIngredient(text);
+    return {
+      amount: parsed.amount,
+      name: parsed.name,
+    };
+  });
+}
+
+/**
+ * Parses recipeInstructions to an array of step strings.
+ * Handles HowToStep, HowToSection, plain strings, and single string with newlines.
+ */
+function parseInstructions(
+  instructions: SchemaInstruction[] | string[] | string | undefined
+): string[] {
+  if (!instructions) {
+    return [];
+  }
+
+  // Single string - split by newlines or return as single step
+  if (typeof instructions === 'string') {
+    const lines = instructions
+      .split(/\n+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    return lines.length > 0 ? lines : [instructions];
+  }
+
+  // Array of strings or objects
+  const steps: string[] = [];
+
+  for (const item of instructions) {
+    if (typeof item === 'string') {
+      steps.push(item.trim());
+    } else if (item && typeof item === 'object') {
+      // HowToSection with nested steps
+      if (item['@type'] === 'HowToSection' && item.itemListElement) {
+        for (const subItem of item.itemListElement) {
+          if (typeof subItem === 'string') {
+            steps.push(subItem.trim());
+          } else if (subItem.text) {
+            steps.push(subItem.text.trim());
+          }
+        }
+      }
+      // HowToStep
+      else if (item.text) {
+        steps.push(item.text.trim());
+      }
+      // Object with just name
+      else if (item.name) {
+        steps.push(item.name.trim());
+      }
+    }
+  }
+
+  return steps.filter(Boolean);
+}
+
+/**
+ * Extracts image URL from various Schema.org image formats.
+ */
+function parseImageUrl(
+  image: string | string[] | { url: string } | { url: string }[] | undefined
+): string | undefined {
+  if (!image) {
+    return undefined;
+  }
+
+  // Direct string URL
+  if (typeof image === 'string') {
+    return image;
+  }
+
+  // Array - take first
+  if (Array.isArray(image)) {
+    const first = image[0];
+    if (typeof first === 'string') {
+      return first;
+    }
+    if (first && typeof first === 'object' && 'url' in first) {
+      return first.url;
+    }
+    return undefined;
+  }
+
+  // Object with url property
+  if (typeof image === 'object' && 'url' in image) {
+    return image.url;
+  }
+
+  return undefined;
 }
