@@ -1,0 +1,381 @@
+---
+interface Props {
+  slug: string;
+}
+
+const { slug } = Astro.props;
+---
+
+<div class="comments-section" data-slug={slug}>
+  <h2 class="text-2xl font-semibold text-ctp-text mb-6 flex items-center gap-2">
+    <svg
+      class="w-6 h-6 text-ctp-lavender"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      stroke-width="2"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+      ></path>
+    </svg>
+    Comments
+    <span class="comments-count text-base font-normal text-ctp-subtext0"></span>
+  </h2>
+
+  {/* Comment Form */}
+  <form class="comment-form mb-8">
+    <div class="bg-ctp-surface0 rounded-xl p-4 border border-ctp-surface1">
+      <div class="mb-4">
+        <label for="comment-author" class="block text-sm font-medium text-ctp-subtext1 mb-1">
+          Your Name
+        </label>
+        <input
+          type="text"
+          id="comment-author"
+          name="author_name"
+          required
+          maxlength="100"
+          class="w-full px-3 py-2 rounded-lg bg-ctp-base border border-ctp-surface2 text-ctp-text placeholder-ctp-overlay0 focus:outline-none focus:ring-2 focus:ring-ctp-lavender focus:border-transparent"
+          placeholder="Enter your name"
+        />
+      </div>
+
+      <div class="mb-4">
+        <label for="comment-content" class="block text-sm font-medium text-ctp-subtext1 mb-1">
+          Comment
+        </label>
+        <textarea
+          id="comment-content"
+          name="content"
+          required
+          maxlength="5000"
+          rows="4"
+          class="w-full px-3 py-2 rounded-lg bg-ctp-base border border-ctp-surface2 text-ctp-text placeholder-ctp-overlay0 focus:outline-none focus:ring-2 focus:ring-ctp-lavender focus:border-transparent resize-y"
+          placeholder="Share your thoughts about this recipe..."
+        ></textarea>
+      </div>
+
+      {/* Honeypot field - hidden from users, visible to bots */}
+      <div class="hidden" aria-hidden="true">
+        <label for="comment-website">Website (leave blank)</label>
+        <input
+          type="text"
+          id="comment-website"
+          name="honeypot"
+          tabindex="-1"
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="flex items-center justify-between">
+        <p class="comment-form-error text-sm text-ctp-red hidden"></p>
+        <button
+          type="submit"
+          class="comment-submit-btn ml-auto inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-ctp-lavender text-ctp-base font-medium transition-all hover:bg-ctp-lavender/90 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <span class="submit-text">Post Comment</span>
+          <svg
+            class="submit-spinner w-4 h-4 animate-spin hidden"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </form>
+
+  {/* Comments List */}
+  <div class="comments-list space-y-4">
+    {/* Loading State */}
+    <div class="comments-loading flex items-center justify-center py-8 text-ctp-subtext0">
+      <svg class="w-5 h-5 animate-spin mr-2" fill="none" viewBox="0 0 24 24">
+        <circle
+          class="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+        ></circle>
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        ></path>
+      </svg>
+      Loading comments...
+    </div>
+
+    {/* Error State */}
+    <div class="comments-error hidden text-center py-8">
+      <p class="text-ctp-red mb-2">Failed to load comments</p>
+      <button
+        type="button"
+        class="retry-comments-btn text-sm text-ctp-lavender hover:underline"
+      >
+        Try again
+      </button>
+    </div>
+
+    {/* Empty State */}
+    <div class="comments-empty hidden text-center py-8 text-ctp-subtext0">
+      <p>No comments yet. Be the first to share your thoughts!</p>
+    </div>
+
+    {/* Comments will be inserted here */}
+  </div>
+</div>
+
+{/* Comment Template (hidden, used for cloning) */}
+<template id="comment-template">
+  <article class="comment bg-ctp-surface0 rounded-xl p-4 border border-ctp-surface1">
+    <header class="flex items-center justify-between mb-2">
+      <span class="comment-author font-medium text-ctp-text"></span>
+      <time class="comment-date text-sm text-ctp-subtext0"></time>
+    </header>
+    <p class="comment-content text-ctp-subtext1 whitespace-pre-wrap"></p>
+  </article>
+</template>
+
+<script>
+  interface Comment {
+    id: number;
+    recipe_slug: string;
+    author_name: string;
+    content: string;
+    created_at: string;
+  }
+
+  function formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} minute${diffMins === 1 ? '' : 's'} ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  }
+
+  function createCommentElement(comment: Comment): HTMLElement {
+    const template = document.getElementById('comment-template') as HTMLTemplateElement;
+    const clone = template.content.cloneNode(true) as DocumentFragment;
+    const article = clone.querySelector('.comment') as HTMLElement;
+
+    const authorEl = article.querySelector('.comment-author') as HTMLElement;
+    const dateEl = article.querySelector('.comment-date') as HTMLElement;
+    const contentEl = article.querySelector('.comment-content') as HTMLElement;
+
+    authorEl.textContent = comment.author_name;
+    dateEl.textContent = formatDate(comment.created_at);
+    dateEl.setAttribute('datetime', comment.created_at);
+    contentEl.textContent = comment.content;
+
+    return article;
+  }
+
+  function initComments() {
+    const sections = document.querySelectorAll('.comments-section');
+
+    sections.forEach((section) => {
+      const slug = (section as HTMLElement).dataset.slug;
+      if (!slug) return;
+
+      const listEl = section.querySelector('.comments-list') as HTMLElement;
+      const loadingEl = section.querySelector('.comments-loading') as HTMLElement;
+      const errorEl = section.querySelector('.comments-error') as HTMLElement;
+      const emptyEl = section.querySelector('.comments-empty') as HTMLElement;
+      const countEl = section.querySelector('.comments-count') as HTMLElement;
+      const form = section.querySelector('.comment-form') as HTMLFormElement;
+      const formError = section.querySelector('.comment-form-error') as HTMLElement;
+      const submitBtn = section.querySelector('.comment-submit-btn') as HTMLButtonElement;
+      const submitText = section.querySelector('.submit-text') as HTMLElement;
+      const submitSpinner = section.querySelector('.submit-spinner') as HTMLElement;
+      const retryBtn = section.querySelector('.retry-comments-btn') as HTMLButtonElement;
+
+      let comments: Comment[] = [];
+
+      async function fetchComments() {
+        loadingEl.classList.remove('hidden');
+        errorEl.classList.add('hidden');
+        emptyEl.classList.add('hidden');
+
+        // Remove existing comments
+        listEl.querySelectorAll('.comment').forEach((el) => el.remove());
+
+        try {
+          const response = await fetch(`/api/comments/${slug}`);
+          if (!response.ok) {
+            throw new Error('Failed to fetch comments');
+          }
+
+          comments = await response.json();
+          loadingEl.classList.add('hidden');
+
+          if (comments.length === 0) {
+            emptyEl.classList.remove('hidden');
+            countEl.textContent = '';
+          } else {
+            countEl.textContent = `(${comments.length})`;
+            comments.forEach((comment) => {
+              const el = createCommentElement(comment);
+              listEl.appendChild(el);
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching comments:', error);
+          loadingEl.classList.add('hidden');
+          errorEl.classList.remove('hidden');
+        }
+      }
+
+      async function handleSubmit(e: Event) {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const authorName = formData.get('author_name') as string;
+        const content = formData.get('content') as string;
+        const honeypot = formData.get('honeypot') as string;
+
+        // Hide previous error
+        formError.classList.add('hidden');
+
+        // Validate
+        if (!authorName.trim() || !content.trim()) {
+          formError.textContent = 'Please fill in all fields';
+          formError.classList.remove('hidden');
+          return;
+        }
+
+        // Show loading state
+        submitBtn.disabled = true;
+        submitText.textContent = 'Posting...';
+        submitSpinner.classList.remove('hidden');
+
+        try {
+          const response = await fetch(`/api/comments/${slug}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              author_name: authorName.trim(),
+              content: content.trim(),
+              honeypot,
+            }),
+          });
+
+          if (response.status === 429) {
+            throw new Error('Too many requests. Please try again later.');
+          }
+
+          if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.errors?.join(', ') || data.error || 'Failed to post comment');
+          }
+
+          const newComment = await response.json();
+
+          // Clear form
+          form.reset();
+
+          // Hide empty state if it was showing
+          emptyEl.classList.add('hidden');
+
+          // Prepend new comment to list (newest first)
+          const newEl = createCommentElement(newComment);
+          newEl.classList.add('comment-new');
+
+          const firstComment = listEl.querySelector('.comment');
+          if (firstComment) {
+            listEl.insertBefore(newEl, firstComment);
+          } else {
+            listEl.appendChild(newEl);
+          }
+
+          // Update count
+          comments.unshift(newComment);
+          countEl.textContent = `(${comments.length})`;
+
+          // Remove highlight after animation
+          setTimeout(() => {
+            newEl.classList.remove('comment-new');
+          }, 2000);
+        } catch (error) {
+          formError.textContent = error instanceof Error ? error.message : 'Failed to post comment';
+          formError.classList.remove('hidden');
+        } finally {
+          submitBtn.disabled = false;
+          submitText.textContent = 'Post Comment';
+          submitSpinner.classList.add('hidden');
+        }
+      }
+
+      // Bind events
+      form.addEventListener('submit', handleSubmit);
+      retryBtn.addEventListener('click', fetchComments);
+
+      // Initial fetch
+      fetchComments();
+    });
+  }
+
+  // Initialize on page load
+  initComments();
+
+  // Re-initialize when navigating with View Transitions
+  document.addEventListener('astro:page-load', initComments);
+</script>
+
+<style>
+  .comment-new {
+    animation: highlightNew 2s ease-out;
+  }
+
+  @keyframes highlightNew {
+    0% {
+      background-color: rgb(var(--ctp-lavender) / 0.2);
+      transform: scale(1.01);
+    }
+    100% {
+      background-color: rgb(var(--ctp-surface0));
+      transform: scale(1);
+    }
+  }
+
+  /* Hide honeypot field - extra specificity for bots that ignore display: none */
+  .comment-form input[name="honeypot"] {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+</style>

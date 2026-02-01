@@ -3,6 +3,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import ServingsScaler from '../../components/ServingsScaler.astro';
 import CookMode from '../../components/CookMode.astro';
 import AddToShoppingListButton from '../../components/AddToShoppingListButton.astro';
+import Ratings from '../../components/Ratings.astro';
+import Comments from '../../components/Comments.astro';
 import { getCollection, type CollectionEntry } from 'astro:content';
 
 // Prerender all recipe pages at build time
@@ -174,6 +176,11 @@ const allIngredients = ingredientSections.flatMap((section) => section.items);
       {title}
     </h1>
     <p class="text-ctp-subtext1 mb-4">by {author}</p>
+
+    {/* Recipe Rating */}
+    <div class="mb-4">
+      <Ratings slug={slug} />
+    </div>
 
     {/* Metadata badges */}
     <div class="flex flex-wrap gap-3 mb-4">
@@ -435,12 +442,10 @@ const allIngredients = ingredientSections.flatMap((section) => section.items);
     )
   }
 
-  {/* Placeholder for future comments/ratings */}
+  {/* Comments Section */}
   <div class="max-w-5xl mx-auto px-4 pb-12">
     <div class="border-t border-ctp-surface1 pt-8">
-      <p class="text-center text-ctp-overlay0 text-sm">
-        Comments and ratings coming soon...
-      </p>
+      <Comments slug={slug} />
     </div>
   </div>
 </BaseLayout>

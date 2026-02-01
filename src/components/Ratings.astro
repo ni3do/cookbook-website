@@ -1,0 +1,344 @@
+---
+interface Props {
+  slug: string;
+}
+
+const { slug } = Astro.props;
+---
+
+<div class="ratings-section" data-slug={slug}>
+  {/* Current Rating Display */}
+  <div class="rating-display flex items-center gap-3 mb-4">
+    <div class="rating-stars flex items-center gap-0.5" aria-label="Current rating">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <svg
+          class="star-icon w-6 h-6 text-ctp-surface2"
+          data-star={star}
+          fill="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+        </svg>
+      ))}
+    </div>
+    <span class="rating-value text-lg font-semibold text-ctp-text">
+      <span class="rating-average">-</span>
+      <span class="text-ctp-subtext0 font-normal">/5</span>
+    </span>
+    <span class="rating-count text-sm text-ctp-subtext0">
+      (<span class="count-value">0</span> ratings)
+    </span>
+  </div>
+
+  {/* Rating Form */}
+  <form class="rating-form">
+    <div class="bg-ctp-surface0 rounded-xl p-4 border border-ctp-surface1">
+      <p class="text-sm font-medium text-ctp-subtext1 mb-3">Rate this recipe</p>
+
+      {/* Star Selector */}
+      <div class="star-selector flex items-center gap-1 mb-4" role="radiogroup" aria-label="Select rating">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            type="button"
+            class="star-btn p-1 rounded transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-ctp-peach focus:ring-offset-2 focus:ring-offset-ctp-surface0"
+            data-rating={star}
+            aria-label={`Rate ${star} star${star !== 1 ? 's' : ''}`}
+            role="radio"
+            aria-checked="false"
+          >
+            <svg
+              class="w-8 h-8 text-ctp-surface2 transition-colors"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+          </button>
+        ))}
+        <span class="selected-rating-text ml-2 text-sm text-ctp-subtext0 min-w-[4rem]"></span>
+      </div>
+
+      {/* Name Input */}
+      <div class="mb-4">
+        <label for="rating-author" class="block text-sm font-medium text-ctp-subtext1 mb-1">
+          Your Name
+        </label>
+        <input
+          type="text"
+          id="rating-author"
+          name="author_name"
+          required
+          maxlength="100"
+          class="w-full px-3 py-2 rounded-lg bg-ctp-base border border-ctp-surface2 text-ctp-text placeholder-ctp-overlay0 focus:outline-none focus:ring-2 focus:ring-ctp-peach focus:border-transparent"
+          placeholder="Enter your name"
+        />
+      </div>
+
+      {/* Honeypot field - hidden from users */}
+      <div class="hidden" aria-hidden="true">
+        <label for="rating-website">Website (leave blank)</label>
+        <input
+          type="text"
+          id="rating-website"
+          name="honeypot"
+          tabindex="-1"
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="flex items-center justify-between">
+        <p class="rating-form-error text-sm text-ctp-red hidden"></p>
+        <button
+          type="submit"
+          disabled
+          class="rating-submit-btn ml-auto inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-ctp-peach text-ctp-base font-medium transition-all hover:bg-ctp-peach/90 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <span class="submit-text">Submit Rating</span>
+          <svg
+            class="submit-spinner w-4 h-4 animate-spin hidden"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+        </button>
+      </div>
+
+      {/* Success Message */}
+      <div class="rating-success hidden mt-4 p-3 rounded-lg bg-ctp-green/10 border border-ctp-green/30 text-ctp-green text-sm">
+        Thank you for your rating!
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+  interface RatingStats {
+    averageRating: number | null;
+    ratingCount: number;
+  }
+
+  const RATING_LABELS = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+
+  function initRatings() {
+    const sections = document.querySelectorAll('.ratings-section');
+
+    sections.forEach((section) => {
+      const slug = (section as HTMLElement).dataset.slug;
+      if (!slug) return;
+
+      // Elements
+      const displayStars = section.querySelectorAll('.rating-display .star-icon');
+      const averageEl = section.querySelector('.rating-average') as HTMLElement;
+      const countValueEl = section.querySelector('.count-value') as HTMLElement;
+      const form = section.querySelector('.rating-form') as HTMLFormElement;
+      const starBtns = section.querySelectorAll('.star-btn') as NodeListOf<HTMLButtonElement>;
+      const selectedText = section.querySelector('.selected-rating-text') as HTMLElement;
+      const formError = section.querySelector('.rating-form-error') as HTMLElement;
+      const submitBtn = section.querySelector('.rating-submit-btn') as HTMLButtonElement;
+      const submitText = section.querySelector('.submit-text') as HTMLElement;
+      const submitSpinner = section.querySelector('.submit-spinner') as HTMLElement;
+      const successMsg = section.querySelector('.rating-success') as HTMLElement;
+
+      let selectedRating = 0;
+      let hasSubmitted = false;
+
+      function updateDisplayStars(average: number | null) {
+        displayStars.forEach((star, index) => {
+          const starNum = index + 1;
+          if (average !== null && starNum <= Math.round(average)) {
+            star.classList.remove('text-ctp-surface2');
+            star.classList.add('text-ctp-peach');
+          } else {
+            star.classList.add('text-ctp-surface2');
+            star.classList.remove('text-ctp-peach');
+          }
+        });
+
+        averageEl.textContent = average !== null ? average.toFixed(1) : '-';
+      }
+
+      function updateSelectorStars(hoverRating: number) {
+        starBtns.forEach((btn) => {
+          const rating = parseInt(btn.dataset.rating || '0', 10);
+          const svg = btn.querySelector('svg') as SVGElement;
+          const isActive = rating <= (hoverRating || selectedRating);
+
+          if (isActive) {
+            svg.classList.remove('text-ctp-surface2');
+            svg.classList.add('text-ctp-peach');
+          } else {
+            svg.classList.add('text-ctp-surface2');
+            svg.classList.remove('text-ctp-peach');
+          }
+
+          btn.setAttribute('aria-checked', String(rating === selectedRating));
+        });
+
+        const labelRating = hoverRating || selectedRating;
+        selectedText.textContent = labelRating > 0 ? RATING_LABELS[labelRating] : '';
+      }
+
+      async function fetchRatings() {
+        try {
+          const response = await fetch(`/api/ratings/${slug}`);
+          if (!response.ok) throw new Error('Failed to fetch ratings');
+
+          const stats: RatingStats = await response.json();
+          updateDisplayStars(stats.averageRating);
+          countValueEl.textContent = String(stats.ratingCount);
+        } catch (error) {
+          console.error('Error fetching ratings:', error);
+        }
+      }
+
+      async function handleSubmit(e: Event) {
+        e.preventDefault();
+
+        if (hasSubmitted) return;
+
+        const formData = new FormData(form);
+        const authorName = formData.get('author_name') as string;
+        const honeypot = formData.get('honeypot') as string;
+
+        // Hide previous messages
+        formError.classList.add('hidden');
+        successMsg.classList.add('hidden');
+
+        // Validate
+        if (selectedRating === 0) {
+          formError.textContent = 'Please select a rating';
+          formError.classList.remove('hidden');
+          return;
+        }
+
+        if (!authorName.trim()) {
+          formError.textContent = 'Please enter your name';
+          formError.classList.remove('hidden');
+          return;
+        }
+
+        // Show loading state
+        submitBtn.disabled = true;
+        submitText.textContent = 'Submitting...';
+        submitSpinner.classList.remove('hidden');
+
+        try {
+          const response = await fetch(`/api/ratings/${slug}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              author_name: authorName.trim(),
+              rating: selectedRating,
+              honeypot,
+            }),
+          });
+
+          if (response.status === 429) {
+            throw new Error('Too many requests. Please try again later.');
+          }
+
+          if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.errors?.join(', ') || data.error || 'Failed to submit rating');
+          }
+
+          const stats: RatingStats = await response.json();
+
+          // Update display with new average
+          updateDisplayStars(stats.averageRating);
+          countValueEl.textContent = String(stats.ratingCount);
+
+          // Show success message
+          successMsg.classList.remove('hidden');
+          hasSubmitted = true;
+
+          // Disable the form
+          submitBtn.disabled = true;
+          submitText.textContent = 'Rating Submitted';
+          starBtns.forEach((btn) => (btn.disabled = true));
+          const authorInput = form.querySelector('input[name="author_name"]') as HTMLInputElement;
+          if (authorInput) authorInput.disabled = true;
+        } catch (error) {
+          formError.textContent = error instanceof Error ? error.message : 'Failed to submit rating';
+          formError.classList.remove('hidden');
+          submitBtn.disabled = false;
+        } finally {
+          submitText.textContent = hasSubmitted ? 'Rating Submitted' : 'Submit Rating';
+          submitSpinner.classList.add('hidden');
+        }
+      }
+
+      // Star button events
+      starBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          if (hasSubmitted) return;
+          selectedRating = parseInt(btn.dataset.rating || '0', 10);
+          updateSelectorStars(0);
+          submitBtn.disabled = false;
+        });
+
+        btn.addEventListener('mouseenter', () => {
+          if (hasSubmitted) return;
+          const hoverRating = parseInt(btn.dataset.rating || '0', 10);
+          updateSelectorStars(hoverRating);
+        });
+
+        btn.addEventListener('mouseleave', () => {
+          if (hasSubmitted) return;
+          updateSelectorStars(0);
+        });
+      });
+
+      // Form submit
+      form.addEventListener('submit', handleSubmit);
+
+      // Initial fetch
+      fetchRatings();
+    });
+  }
+
+  // Initialize on page load
+  initRatings();
+
+  // Re-initialize when navigating with View Transitions
+  document.addEventListener('astro:page-load', initRatings);
+</script>
+
+<style>
+  .star-btn {
+    cursor: pointer;
+  }
+
+  .star-btn:disabled {
+    cursor: default;
+  }
+
+  .star-btn:disabled:hover {
+    transform: none;
+  }
+
+  /* Hide honeypot field */
+  .rating-form input[name="honeypot"] {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+</style>
