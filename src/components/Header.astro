@@ -61,7 +61,75 @@ import ThemeToggle from './ThemeToggle.astro';
         </svg>
       </button>
 
+      <!-- Shopping cart button -->
+      <button
+        type="button"
+        id="shopping-cart-btn"
+        class="relative p-2 rounded-xl bg-ctp-surface0 hover:bg-ctp-surface1 transition-colors"
+        aria-label="Open shopping list"
+      >
+        <svg
+          class="w-5 h-5 text-ctp-text"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+          ></path>
+        </svg>
+        <!-- Badge for item count -->
+        <span
+          id="cart-badge"
+          class="hidden absolute -top-1 -right-1 min-w-5 h-5 flex items-center justify-center text-xs font-bold bg-ctp-teal text-ctp-base rounded-full px-1"
+        ></span>
+      </button>
+
       <ThemeToggle />
     </div>
   </div>
 </header>
+
+<script>
+  import { getShoppingListItemCount } from '../utils/shoppingList';
+
+  function initShoppingCartButton() {
+    const cartBtn = document.getElementById('shopping-cart-btn');
+    const badge = document.getElementById('cart-badge');
+
+    if (!cartBtn || !badge) return;
+
+    // Update badge count
+    function updateBadge() {
+      const count = getShoppingListItemCount();
+      if (count > 0) {
+        badge.textContent = count > 99 ? '99+' : String(count);
+        badge.classList.remove('hidden');
+        badge.classList.add('flex');
+      } else {
+        badge.classList.add('hidden');
+        badge.classList.remove('flex');
+      }
+    }
+
+    // Open shopping list drawer on click
+    cartBtn.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('openshoppinglist'));
+    });
+
+    // Initial badge update
+    updateBadge();
+
+    // Update badge when shopping list changes
+    window.addEventListener('shoppinglistchange', updateBadge);
+  }
+
+  // Initialize on page load
+  initShoppingCartButton();
+
+  // Re-initialize when navigating with View Transitions
+  document.addEventListener('astro:page-load', initShoppingCartButton);
+</script>
