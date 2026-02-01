@@ -229,9 +229,12 @@ const allIngredients = ingredientSections.flatMap((section) => section.items);
     <div class="flex flex-wrap gap-2 mb-4">
       {
         tags.map((tag) => (
-          <span class="px-3 py-1 text-sm font-medium rounded-full bg-ctp-green/20 text-ctp-green border border-ctp-green/30">
+          <a
+            href={`/tags/${tag}`}
+            class="px-3 py-1 text-sm font-medium rounded-full bg-ctp-green/20 text-ctp-green border border-ctp-green/30 hover:bg-ctp-green/30 hover:border-ctp-green/50 transition-colors"
+          >
             {tag.replace(/-/g, ' ')}
-          </span>
+          </a>
         ))
       }
     </div>

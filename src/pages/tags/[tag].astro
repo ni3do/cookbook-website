@@ -1,0 +1,87 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import RecipeCard from '../../components/RecipeCard.astro';
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+
+// Prerender all tag pages at build time
+export const prerender = true;
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const recipes = await getCollection('recipes');
+
+  // Get all unique tags that have at least one recipe
+  const tagsWithRecipes = new Set<string>();
+  recipes.forEach((recipe) => {
+    recipe.data.tags.forEach((tag) => tagsWithRecipes.add(tag));
+  });
+
+  return Array.from(tagsWithRecipes).map((tag) => ({
+    params: { tag },
+    props: {
+      recipes: recipes.filter((recipe) => recipe.data.tags.includes(tag)),
+    },
+  }));
+};
+
+const { tag } = Astro.params;
+const { recipes } = Astro.props;
+
+// Format tag for display (capitalize and replace hyphens with spaces)
+const displayTag = tag.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+---
+
+<BaseLayout
+  title={displayTag}
+  description={`Browse ${recipes.length} ${displayTag.toLowerCase()} recipes`}
+>
+  <section class="bg-gradient-to-b from-ctp-mantle to-ctp-base py-12 md:py-16">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+      {/* Breadcrumb */}
+      <nav class="mb-6" aria-label="Breadcrumb">
+        <ol class="flex items-center justify-center gap-2 text-sm text-ctp-subtext1">
+          <li>
+            <a href="/" class="hover:text-ctp-mauve transition-colors">Home</a>
+          </li>
+          <li class="text-ctp-overlay0">/</li>
+          <li>
+            <a href="/tags" class="hover:text-ctp-mauve transition-colors">Tags</a>
+          </li>
+          <li class="text-ctp-overlay0">/</li>
+          <li class="text-ctp-text font-medium">{displayTag}</li>
+        </ol>
+      </nav>
+
+      <h1 class="text-4xl md:text-5xl font-bold text-ctp-text mb-4">
+        <span class="text-ctp-mauve">{displayTag}</span> Recipes
+      </h1>
+      <p class="text-lg text-ctp-subtext1">
+        {recipes.length} {recipes.length === 1 ? 'recipe' : 'recipes'} found
+      </p>
+    </div>
+  </section>
+
+  <section class="max-w-6xl mx-auto px-4 py-12">
+    {
+      recipes.length > 0 ? (
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {recipes.map((recipe) => (
+            <RecipeCard recipe={recipe} />
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-16">
+          <p class="text-ctp-subtext1 text-lg">
+            No recipes found with this tag.
+          </p>
+          <a
+            href="/tags"
+            class="inline-block mt-4 px-6 py-2 bg-ctp-mauve text-ctp-base rounded-xl font-medium hover:bg-ctp-mauve/90 transition-colors"
+          >
+            Browse all tags
+          </a>
+        </div>
+      )
+    }
+  </section>
+</BaseLayout>

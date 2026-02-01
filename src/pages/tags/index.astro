@@ -1,0 +1,134 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { RECIPE_TAGS } from '../../content/config';
+
+// Fetch all recipes and count tags
+const recipes = await getCollection('recipes');
+const tagCounts = new Map<string, number>();
+
+recipes.forEach((recipe) => {
+  recipe.data.tags.forEach((tag) => {
+    tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+  });
+});
+
+// Define tag categories for grouping
+const TAG_CATEGORIES: Record<string, string[]> = {
+  Cuisine: [
+    'italian',
+    'asian',
+    'mexican',
+    'mediterranean',
+    'american',
+    'french',
+    'indian',
+    'middle-eastern',
+  ],
+  Meal: ['breakfast', 'lunch', 'dinner', 'snack', 'dessert', 'appetizer'],
+  Diet: ['vegetarian', 'vegan', 'gluten-free', 'dairy-free', 'keto', 'low-carb'],
+  Speed: ['quick', 'weeknight', 'meal-prep', 'slow-cooker'],
+  Style: ['comfort-food', 'healthy', 'one-pot', 'grilling', 'salad', 'soup', 'stew'],
+  Protein: ['chicken', 'beef', 'pork', 'fish', 'seafood', 'tofu', 'eggs'],
+  Baking: [
+    'bread',
+    'cookies',
+    'cakes',
+    'pies',
+    'pastry',
+    'muffins',
+    'brownies',
+    'tarts',
+    'sourdough',
+    'no-knead',
+    'yeast-baking',
+    'quick-bread',
+  ],
+  Season: ['summer', 'fall', 'winter', 'spring', 'holiday'],
+};
+
+// Category colors using Catppuccin palette
+const CATEGORY_COLORS: Record<string, string> = {
+  Cuisine: 'ctp-mauve',
+  Meal: 'ctp-blue',
+  Diet: 'ctp-green',
+  Speed: 'ctp-peach',
+  Style: 'ctp-pink',
+  Protein: 'ctp-red',
+  Baking: 'ctp-yellow',
+  Season: 'ctp-teal',
+};
+
+// Filter to only show categories that have tags with recipes
+const categoriesWithRecipes = Object.entries(TAG_CATEGORIES)
+  .map(([category, tags]) => {
+    const tagsWithCounts = tags
+      .filter((tag) => tagCounts.has(tag))
+      .map((tag) => ({ tag, count: tagCounts.get(tag)! }))
+      .sort((a, b) => b.count - a.count);
+    return { category, tags: tagsWithCounts };
+  })
+  .filter((item) => item.tags.length > 0);
+
+// Total unique tags with recipes
+const totalTags = [...tagCounts.keys()].length;
+---
+
+<BaseLayout title="Browse Tags" description="Browse recipes by category and tag">
+  <section class="bg-gradient-to-b from-ctp-mantle to-ctp-base py-12 md:py-16">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+      <h1 class="text-4xl md:text-5xl font-bold text-ctp-text mb-4">
+        Browse by <span class="text-ctp-mauve">Tag</span>
+      </h1>
+      <p class="text-lg text-ctp-subtext1 max-w-2xl mx-auto">
+        Explore our collection of {recipes.length} recipes organized by {totalTags} tags across {categoriesWithRecipes.length} categories.
+      </p>
+    </div>
+  </section>
+
+  <section class="max-w-6xl mx-auto px-4 py-12">
+    <div class="space-y-12">
+      {
+        categoriesWithRecipes.map(({ category, tags }) => {
+          const colorClass = CATEGORY_COLORS[category] || 'ctp-mauve';
+          return (
+            <div>
+              <div class="flex items-center gap-3 mb-4">
+                <h2 class={`text-2xl font-bold text-${colorClass}`}>{category}</h2>
+                <span class="text-ctp-subtext0 text-sm">
+                  ({tags.length} {tags.length === 1 ? 'tag' : 'tags'})
+                </span>
+              </div>
+              <div class="flex flex-wrap gap-3">
+                {tags.map(({ tag, count }) => (
+                  <a
+                    href={`/tags/${tag}`}
+                    class:list={[
+                      'group flex items-center gap-2 px-4 py-2 rounded-xl',
+                      'bg-ctp-surface0 border border-ctp-surface1',
+                      'transition-all duration-200',
+                      'hover:bg-ctp-surface1 hover:border-ctp-surface2',
+                      `hover:shadow-soft-sm`,
+                    ]}
+                  >
+                    <span class="text-ctp-text font-medium capitalize">
+                      {tag.replace(/-/g, ' ')}
+                    </span>
+                    <span
+                      class:list={[
+                        'px-2 py-0.5 rounded-full text-xs font-medium',
+                        `bg-${colorClass}/20 text-${colorClass}`,
+                      ]}
+                    >
+                      {count}
+                    </span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          );
+        })
+      }
+    </div>
+  </section>
+</BaseLayout>

@@ -111,9 +111,13 @@ const imagePath = `/images/recipes/${image}`;
         displayTags.length > 0 && (
           <div class="flex flex-wrap gap-1.5">
             {displayTags.map((tag) => (
-              <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-ctp-surface2 text-ctp-subtext1">
+              <a
+                href={`/tags/${tag}`}
+                class="tag-link px-2 py-0.5 text-xs font-medium rounded-full bg-ctp-surface2 text-ctp-subtext1 hover:bg-ctp-mauve/20 hover:text-ctp-mauve transition-colors"
+                onclick="event.stopPropagation();"
+              >
                 {tag}
-              </span>
+              </a>
             ))}
             {tags.length > 3 && (
               <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-ctp-surface2 text-ctp-overlay0">
