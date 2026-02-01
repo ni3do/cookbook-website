@@ -24,31 +24,31 @@ Dark theme is the default, with a toggle to switch.
 
 ### Mocha (Dark Theme - Default)
 
-| Role           | Color      | Hex       |
-|----------------|------------|-----------|
-| Background     | Base       | `#1e1e2e` |
-| Cards/Surface  | Surface 0  | `#313244` |
-| Text           | Text       | `#cdd6f4` |
-| Subtext        | Subtext 1  | `#bac2de` |
-| Accent (warm)  | Peach      | `#fab387` |
-| Accent (cool)  | Mauve      | `#cba6f7` |
-| Success/Tags   | Green      | `#a6e3a1` |
-| Links          | Sapphire   | `#74c7ec` |
-| Error          | Red        | `#f38ba8` |
+| Role          | Color     | Hex       |
+| ------------- | --------- | --------- |
+| Background    | Base      | `#1e1e2e` |
+| Cards/Surface | Surface 0 | `#313244` |
+| Text          | Text      | `#cdd6f4` |
+| Subtext       | Subtext 1 | `#bac2de` |
+| Accent (warm) | Peach     | `#fab387` |
+| Accent (cool) | Mauve     | `#cba6f7` |
+| Success/Tags  | Green     | `#a6e3a1` |
+| Links         | Sapphire  | `#74c7ec` |
+| Error         | Red       | `#f38ba8` |
 
 ### Latte (Light Theme)
 
-| Role           | Color      | Hex       |
-|----------------|------------|-----------|
-| Background     | Base       | `#eff1f5` |
-| Cards/Surface  | Surface 0  | `#ccd0da` |
-| Text           | Text       | `#4c4f69` |
-| Subtext        | Subtext 1  | `#5c5f77` |
-| Accent (warm)  | Peach      | `#fe640b` |
-| Accent (cool)  | Mauve      | `#8839ef` |
-| Success/Tags   | Green      | `#40a02b` |
-| Links          | Sapphire   | `#209fb5` |
-| Error          | Red        | `#d20f39` |
+| Role          | Color     | Hex       |
+| ------------- | --------- | --------- |
+| Background    | Base      | `#eff1f5` |
+| Cards/Surface | Surface 0 | `#ccd0da` |
+| Text          | Text      | `#4c4f69` |
+| Subtext       | Subtext 1 | `#5c5f77` |
+| Accent (warm) | Peach     | `#fe640b` |
+| Accent (cool) | Mauve     | `#8839ef` |
+| Success/Tags  | Green     | `#40a02b` |
+| Links         | Sapphire  | `#209fb5` |
+| Error         | Red       | `#d20f39` |
 
 Full palette reference: https://catppuccin.com/palette/
 
@@ -56,25 +56,25 @@ Full palette reference: https://catppuccin.com/palette/
 
 ## Tech Stack
 
-| Component        | Technology                     |
-|------------------|--------------------------------|
-| Framework        | Astro (with SSR for API routes)|
-| Styling          | Tailwind CSS                   |
-| Content          | Markdown + YAML frontmatter    |
-| Database         | PostgreSQL or SQLite           |
-| Automation       | n8n                            |
-| Deployment       | Dokploy                        |
-| Image Hosting    | Dokploy volume                 |
+| Component     | Technology                      |
+| ------------- | ------------------------------- |
+| Framework     | Astro (with SSR for API routes) |
+| Styling       | Tailwind CSS                    |
+| Content       | Markdown + YAML frontmatter     |
+| Database      | PostgreSQL or SQLite            |
+| Automation    | n8n                             |
+| Deployment    | Dokploy                         |
+| Image Hosting | Dokploy volume                  |
 
 ### Developer Tooling
 
-| Tool             | Purpose                        |
-|------------------|--------------------------------|
-| just             | Command runner (justfile)      |
-| ESLint           | Linting TypeScript/Astro       |
-| Prettier         | Code formatting                |
-| Husky            | Git hooks                      |
-| lint-staged      | Run linters on staged files    |
+| Tool        | Purpose                     |
+| ----------- | --------------------------- |
+| just        | Command runner (justfile)   |
+| ESLint      | Linting TypeScript/Astro    |
+| Prettier    | Code formatting             |
+| Husky       | Git hooks                   |
+| lint-staged | Run linters on staged files |
 
 **Pre-commit hook:** Automatically runs ESLint + Prettier on staged files before each commit.
 
@@ -83,12 +83,14 @@ Full palette reference: https://catppuccin.com/palette/
 ## Pages
 
 ### Home Page
+
 - Hero section with search bar
 - Category/tag filter pills
 - Recipe card grid (masonry or uniform)
 - Cards show: image, title, time, key tags
 
 ### Recipe Page
+
 - Large hero image
 - Title, author, timing badges (prep + cook)
 - Tags as colored pills
@@ -101,10 +103,12 @@ Full palette reference: https://catppuccin.com/palette/
 - Comments and ratings section
 
 ### Category/Tag Pages
+
 - Filtered recipe grid
 - Tag description (optional)
 
 ### Submit Recipe Page
+
 - Form for friends/family to submit recipes
 - Triggers n8n workflow → GitHub PR
 
@@ -178,35 +182,36 @@ notes: |
 
 ### Core
 
-| Feature              | Description                                      |
-|----------------------|--------------------------------------------------|
-| Markdown recipes     | Easy to write, version controlled                |
-| Dark/light toggle    | Catppuccin Mocha/Latte, dark default             |
-| Mobile-first         | Responsive design, works on all devices          |
-| Tags                 | Fixed list, filterable (see Tag List below)      |
-| Source attribution   | Credit original recipes with name + URL          |
-| Search               | Client-side filtering across recipes             |
+| Feature            | Description                                 |
+| ------------------ | ------------------------------------------- |
+| Markdown recipes   | Easy to write, version controlled           |
+| Dark/light toggle  | Catppuccin Mocha/Latte, dark default        |
+| Mobile-first       | Responsive design, works on all devices     |
+| Tags               | Fixed list, filterable (see Tag List below) |
+| Source attribution | Credit original recipes with name + URL     |
+| Search             | Client-side filtering across recipes        |
 
 ### Practical Cooking Features
 
-| Feature              | Description                                      |
-|----------------------|--------------------------------------------------|
-| Ingredient checklist | Interactive checkboxes, persisted in localStorage|
-| Servings scaler      | Adjust servings, ingredients recalculate         |
-| Cook mode            | Larger text, screen stays awake (Wake Lock API), step-by-step |
+| Feature              | Description                                                                                   |
+| -------------------- | --------------------------------------------------------------------------------------------- |
+| Ingredient checklist | Interactive checkboxes, persisted in localStorage                                             |
+| Servings scaler      | Adjust servings, ingredients recalculate                                                      |
+| Cook mode            | Larger text, screen stays awake (Wake Lock API), step-by-step                                 |
 | Shopping list        | Select multiple recipes, generate combined list, share via Web Share API or copy to clipboard |
-| Favorites            | Heart icon, saved to localStorage                |
-| Print stylesheet     | Clean print layout for recipes (hides nav, comments) |
-| PWA / Offline        | Installable app with offline recipe access       |
+| Favorites            | Heart icon, saved to localStorage                                                             |
+| Print stylesheet     | Clean print layout for recipes (hides nav, comments)                                          |
+| PWA / Offline        | Installable app with offline recipe access                                                    |
 
 ### Social Features
 
-| Feature   | Description                                           | Storage     |
-|-----------|-------------------------------------------------------|-------------|
-| Comments  | Name + text, no authentication required               | Database    |
-| Ratings   | Name + 1-5 stars, shows average                       | Database    |
+| Feature  | Description                             | Storage  |
+| -------- | --------------------------------------- | -------- |
+| Comments | Name + text, no authentication required | Database |
+| Ratings  | Name + 1-5 stars, shows average         | Database |
 
 **Anti-spam measures:**
+
 - Honeypot field (hidden field that bots fill)
 - Simple math CAPTCHA ("What's 2 + 3?")
 - Rate limiting
@@ -239,6 +244,7 @@ notes: |
 ### Print Stylesheet
 
 `@media print` styles for recipe pages:
+
 - Hide: navigation, theme toggle, comments, ratings UI, cook mode button
 - Show: recipe image, title, ingredients, steps, tips, source attribution
 - Clean single-column layout
@@ -252,16 +258,16 @@ Tags are a **fixed list** to ensure consistency. Users select from these when su
 
 ### Categories
 
-| Category | Tags |
-|----------|------|
-| **Cuisine** | italian, asian, mexican, mediterranean, american, french, indian, middle-eastern |
-| **Meal** | breakfast, lunch, dinner, snack, dessert, appetizer |
-| **Diet** | vegetarian, vegan, gluten-free, dairy-free, keto, low-carb |
-| **Speed** | quick, weeknight, meal-prep, slow-cooker |
-| **Style** | comfort-food, healthy, one-pot, grilling, salad, soup, stew |
-| **Protein** | chicken, beef, pork, fish, seafood, tofu, eggs |
-| **Baking** | bread, cookies, cakes, pies, pastry, muffins, brownies, tarts, sourdough, no-knead, yeast-baking, quick-bread |
-| **Season** | summer, fall, winter, spring, holiday |
+| Category    | Tags                                                                                                          |
+| ----------- | ------------------------------------------------------------------------------------------------------------- |
+| **Cuisine** | italian, asian, mexican, mediterranean, american, french, indian, middle-eastern                              |
+| **Meal**    | breakfast, lunch, dinner, snack, dessert, appetizer                                                           |
+| **Diet**    | vegetarian, vegan, gluten-free, dairy-free, keto, low-carb                                                    |
+| **Speed**   | quick, weeknight, meal-prep, slow-cooker                                                                      |
+| **Style**   | comfort-food, healthy, one-pot, grilling, salad, soup, stew                                                   |
+| **Protein** | chicken, beef, pork, fish, seafood, tofu, eggs                                                                |
+| **Baking**  | bread, cookies, cakes, pies, pastry, muffins, brownies, tarts, sourdough, no-knead, yeast-baking, quick-bread |
+| **Season**  | summer, fall, winter, spring, holiday                                                                         |
 
 ---
 
@@ -295,12 +301,12 @@ CREATE INDEX idx_ratings_recipe ON ratings(recipe_slug);
 
 ## API Routes (Astro SSR)
 
-| Endpoint                     | Method | Description                    |
-|------------------------------|--------|--------------------------------|
-| `/api/comments/[slug]`       | GET    | Get comments for a recipe      |
-| `/api/comments`              | POST   | Add a comment                  |
-| `/api/ratings/[slug]`        | GET    | Get ratings for a recipe       |
-| `/api/ratings`               | POST   | Add a rating                   |
+| Endpoint               | Method | Description               |
+| ---------------------- | ------ | ------------------------- |
+| `/api/comments/[slug]` | GET    | Get comments for a recipe |
+| `/api/comments`        | POST   | Add a comment             |
+| `/api/ratings/[slug]`  | GET    | Get ratings for a recipe  |
+| `/api/ratings`         | POST   | Add a rating              |
 
 ---
 
@@ -335,20 +341,20 @@ on /submit      →   webhook POST  →   GitHub PR     →   and merge
 
 ### Submit Form Fields
 
-| Field        | Type          | Required |
-|--------------|---------------|----------|
-| Your name    | Text          | Yes      |
-| Recipe title | Text          | Yes      |
-| Photo        | File upload   | Yes      |
-| Prep time    | Number (min)  | Yes      |
-| Cook time    | Number (min)  | Yes      |
-| Servings     | Number        | Yes      |
-| Tags         | Multi-select  | No       |
-| Source name  | Text          | No       |
-| Source URL   | URL           | No       |
-| Ingredients  | Dynamic list  | Yes      |
-| Steps        | Dynamic list  | Yes      |
-| Tips/notes   | Textarea      | No       |
+| Field        | Type         | Required |
+| ------------ | ------------ | -------- |
+| Your name    | Text         | Yes      |
+| Recipe title | Text         | Yes      |
+| Photo        | File upload  | Yes      |
+| Prep time    | Number (min) | Yes      |
+| Cook time    | Number (min) | Yes      |
+| Servings     | Number       | Yes      |
+| Tags         | Multi-select | No       |
+| Source name  | Text         | No       |
+| Source URL   | URL          | No       |
+| Ingredients  | Dynamic list | Yes      |
+| Steps        | Dynamic list | Yes      |
+| Tips/notes   | Textarea     | No       |
 
 ---
 
@@ -570,10 +576,12 @@ Images are stored in a Dokploy volume, shared between Astro and n8n.
 ### Image Optimization Strategy (Hybrid)
 
 **On upload (n8n):**
+
 - n8n uses sharp to create a thumbnail (400px wide, WebP format)
 - Saves both original and thumbnail to volume
 
 **At build time (Astro):**
+
 - Astro's `<Image>` component optimizes hero images
 - Generates responsive srcsets for different screen sizes
 
@@ -607,12 +615,12 @@ https://recipes.siwachter.com/images/recipes/lemon-pasta.jpg
 
 ### Services in Dokploy
 
-| Service       | Purpose                          |
-|---------------|----------------------------------|
-| Astro app     | Main website + API routes        |
-| PostgreSQL    | Comments and ratings             |
-| n8n           | Recipe submission automation     |
-| Volume: images| Shared image storage             |
+| Service        | Purpose                      |
+| -------------- | ---------------------------- |
+| Astro app      | Main website + API routes    |
+| PostgreSQL     | Comments and ratings         |
+| n8n            | Recipe submission automation |
+| Volume: images | Shared image storage         |
 
 ### Build & Deploy Flow
 
@@ -629,19 +637,19 @@ GitHub repo          Dokploy              Live site
 
 ## Decisions Log
 
-| Question | Decision |
-|----------|----------|
-| Site name | **The Kyburz Table** |
-| Image hosting | Dokploy volume (self-hosted, backed up) |
+| Question           | Decision                                                                      |
+| ------------------ | ----------------------------------------------------------------------------- |
+| Site name          | **The Kyburz Table**                                                          |
+| Image hosting      | Dokploy volume (self-hosted, backed up)                                       |
 | Image optimization | Hybrid: n8n creates thumbnail on upload, Astro optimizes hero images at build |
-| Search | Client-side filtering |
-| Tags | Fixed list (see Tag List section) |
-| Comment moderation | None (trust anti-spam measures) |
-| Cook mode | Wake Lock API with graceful fallback for unsupported browsers |
-| Shopping list | localStorage + Web Share API with clipboard fallback |
-| Print stylesheet | Yes |
-| PWA / Offline | Yes |
-| Domain | recipes.siwachter.com |
+| Search             | Client-side filtering                                                         |
+| Tags               | Fixed list (see Tag List section)                                             |
+| Comment moderation | None (trust anti-spam measures)                                               |
+| Cook mode          | Wake Lock API with graceful fallback for unsupported browsers                 |
+| Shopping list      | localStorage + Web Share API with clipboard fallback                          |
+| Print stylesheet   | Yes                                                                           |
+| PWA / Offline      | Yes                                                                           |
+| Domain             | recipes.siwachter.com                                                         |
 
 ---
 

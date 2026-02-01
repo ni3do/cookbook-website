@@ -11,10 +11,15 @@ const { steps, slug } = Astro.props;
   {/* Cook Mode Overlay */}
   <div class="cook-mode-overlay fixed inset-0 z-50 bg-ctp-base flex flex-col">
     {/* Header */}
-    <div class="flex items-center justify-between px-6 py-4 border-b border-ctp-surface1">
+    <div
+      class="flex items-center justify-between px-6 py-4 border-b border-ctp-surface1"
+    >
       <div class="flex items-center gap-3">
-        <div class="wake-lock-indicator flex items-center gap-2 px-3 py-1.5 rounded-full bg-ctp-surface0 text-sm">
-          <span class="wake-lock-dot w-2 h-2 rounded-full bg-ctp-overlay0"></span>
+        <div
+          class="wake-lock-indicator flex items-center gap-2 px-3 py-1.5 rounded-full bg-ctp-surface0 text-sm"
+        >
+          <span class="wake-lock-dot w-2 h-2 rounded-full bg-ctp-overlay0"
+          ></span>
           <span class="wake-lock-text text-ctp-subtext1">Screen: Auto-off</span>
         </div>
       </div>
@@ -24,54 +29,79 @@ const { steps, slug } = Astro.props;
         class="exit-cook-mode p-2 rounded-full bg-ctp-surface0 hover:bg-ctp-surface1 transition-colors"
         aria-label="Exit cook mode"
       >
-        <svg class="w-6 h-6 text-ctp-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        <svg
+          class="w-6 h-6 text-ctp-text"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M6 18L18 6M6 6l12 12"></path>
         </svg>
       </button>
     </div>
 
     {/* Step Content */}
-    <div class="flex-1 flex flex-col items-center justify-center px-6 py-8 overflow-y-auto">
+    <div
+      class="flex-1 flex flex-col items-center justify-center px-6 py-8 overflow-y-auto"
+    >
       <div class="step-progress text-ctp-subtext1 text-lg mb-4">
-        Step <span class="step-current">1</span> of <span class="step-total">{steps.length}</span>
+        Step <span class="step-current">1</span> of <span class="step-total"
+          >{steps.length}</span
+        >
       </div>
 
       <div class="step-content max-w-2xl text-center">
-        {steps.map((step, index) => (
-          <div
-            class="step-item hidden"
-            data-step={index}
-          >
-            <p class="text-2xl md:text-3xl lg:text-4xl leading-relaxed text-ctp-text font-medium">
-              {step}
-            </p>
-          </div>
-        ))}
+        {
+          steps.map((step, index) => (
+            <div class="step-item hidden" data-step={index}>
+              <p class="text-2xl md:text-3xl lg:text-4xl leading-relaxed text-ctp-text font-medium">
+                {step}
+              </p>
+            </div>
+          ))
+        }
       </div>
     </div>
 
     {/* Navigation */}
-    <div class="flex items-center justify-between px-6 py-6 border-t border-ctp-surface1 bg-ctp-mantle">
+    <div
+      class="flex items-center justify-between px-6 py-6 border-t border-ctp-surface1 bg-ctp-mantle"
+    >
       <button
         type="button"
         class="step-prev flex items-center gap-2 px-6 py-3 rounded-xl bg-ctp-surface0 hover:bg-ctp-surface1 text-ctp-text transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         aria-label="Previous step"
       >
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M15 19l-7-7 7-7"></path>
         </svg>
         <span class="text-lg font-medium">Previous</span>
       </button>
 
       <div class="step-dots flex gap-2">
-        {steps.map((_, index) => (
-          <button
-            type="button"
-            class="step-dot w-3 h-3 rounded-full bg-ctp-surface1 transition-colors"
-            data-step={index}
-            aria-label={`Go to step ${index + 1}`}
-          />
-        ))}
+        {
+          steps.map((_, index) => (
+            <button
+              type="button"
+              class="step-dot w-3 h-3 rounded-full bg-ctp-surface1 transition-colors"
+              data-step={index}
+              aria-label={`Go to step ${index + 1}`}
+            />
+          ))
+        }
       </div>
 
       <button
@@ -80,8 +110,15 @@ const { steps, slug } = Astro.props;
         aria-label="Next step"
       >
         <span class="text-lg font-medium">Next</span>
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"
+          ></path>
         </svg>
       </button>
     </div>
@@ -95,9 +132,22 @@ const { steps, slug } = Astro.props;
   data-slug={slug}
   aria-label="Enter cook mode"
 >
-  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+  <svg
+    class="w-5 h-5"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    stroke-width="2"
+  >
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+    ></path>
   </svg>
   <span>Cook Mode</span>
 </button>
@@ -128,7 +178,9 @@ const { steps, slug } = Astro.props;
       const slug = (toggleBtn as HTMLElement).dataset.slug;
       if (!slug) return;
 
-      const cookMode = document.querySelector(`.cook-mode[data-slug="${slug}"]`);
+      const cookMode = document.querySelector(
+        `.cook-mode[data-slug="${slug}"]`
+      );
       if (!cookMode) return;
 
       const overlay = cookMode.querySelector('.cook-mode-overlay');
@@ -198,7 +250,10 @@ const { steps, slug } = Astro.props;
             };
 
             // Re-acquire when page becomes visible again
-            document.addEventListener('visibilitychange', handleVisibilityChange);
+            document.addEventListener(
+              'visibilitychange',
+              handleVisibilityChange
+            );
           } catch (err) {
             console.log('Wake Lock request failed:', err);
             updateWakeLockIndicator(false);
@@ -210,7 +265,10 @@ const { steps, slug } = Astro.props;
       }
 
       function handleVisibilityChange() {
-        if (document.visibilityState === 'visible' && !cookMode.classList.contains('hidden')) {
+        if (
+          document.visibilityState === 'visible' &&
+          !cookMode.classList.contains('hidden')
+        ) {
           requestWakeLock();
         }
       }
@@ -220,7 +278,10 @@ const { steps, slug } = Astro.props;
           await wakeLock.release();
           wakeLock = null;
         }
-        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        document.removeEventListener(
+          'visibilitychange',
+          handleVisibilityChange
+        );
         updateWakeLockIndicator(false);
       }
 

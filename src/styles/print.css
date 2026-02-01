@@ -35,7 +35,7 @@
   }
 
   /* Hide the "Back to recipes" link */
-  a[href="/"] {
+  a[href='/'] {
     display: none !important;
   }
 
@@ -120,7 +120,7 @@
   }
 
   .ingredient-label::before {
-    content: "• ";
+    content: '• ';
     font-weight: bold;
   }
 
@@ -166,15 +166,15 @@
   }
 
   /* Source attribution - ensure link URL is visible */
-  a[target="_blank"]::after {
-    content: " (" attr(href) ")";
+  a[target='_blank']::after {
+    content: ' (' attr(href) ')';
     font-size: 0.75em;
     color: #666;
     word-break: break-all;
   }
 
   /* External link icon - hide in print */
-  a[target="_blank"] svg {
+  a[target='_blank'] svg {
     display: none !important;
   }
 
@@ -212,7 +212,7 @@
 
   /* Add a print header with recipe attribution */
   body::after {
-    content: "Printed from The Kyburz Table";
+    content: 'Printed from The Kyburz Table';
     position: fixed;
     bottom: 0;
     right: 0;

@@ -12,13 +12,15 @@ source:
 ---
 
 ## Ingredients
-- `500g` frozen peas  
-- Salt  
-- Lemon juice  
+
+- `500g` frozen peas
+- Salt
+- Lemon juice
 
 ## Steps
-1. Blanch the peas in salted water for 3 minutes.  
-2. Blend the peas with a little water until smooth.  
-3. Push the purée through a fine sieve for extra smoothness.  
-4. Taste and season with salt and a splash of lemon juice.  
+
+1. Blanch the peas in salted water for 3 minutes.
+2. Blend the peas with a little water until smooth.
+3. Push the purée through a fine sieve for extra smoothness.
+4. Taste and season with salt and a splash of lemon juice.
 5. Cool as quickly as possible to preserve the bright green color.

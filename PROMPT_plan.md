@@ -4,6 +4,7 @@ Study the specs/ directory for requirements and specifications.
 Compare these requirements against the existing implementation in the codebase.
 
 Your task is to:
+
 1. Read all specification files in specs/
 2. Analyze the current implementation state
 3. Identify gaps between specs and implementation
@@ -49,6 +50,7 @@ The IMPLEMENTATION_PLAN.md file uses checkboxes to track progress. The loop cont
 ## WARNING: No Manual Tasks
 
 Do NOT add tasks that require manual human intervention, such as:
+
 - "Review and approve changes"
 - "Test in production"
 - "Get API keys from admin"

@@ -22,7 +22,17 @@ interface Props {
 
 const { recipe } = Astro.props;
 const { data, slug } = recipe;
-const { title, image, author, prep_time, cook_time, servings, tags, source, notes } = data;
+const {
+  title,
+  image,
+  author,
+  prep_time,
+  cook_time,
+  servings,
+  tags,
+  source,
+  notes,
+} = data;
 
 const totalTime = prep_time + cook_time;
 const imagePath = `/images/recipes/${image}`;
@@ -35,7 +45,11 @@ const rawBody = recipe.body;
 
 // Helper to parse markdown content into sections
 function parseRecipeContent(content: string) {
-  const sections: { type: 'ingredients' | 'steps'; heading: string; items: string[] }[] = [];
+  const sections: {
+    type: 'ingredients' | 'steps';
+    heading: string;
+    items: string[];
+  }[] = [];
 
   // Split by h2 headings (## Heading)
   const parts = content.split(/^## /m).filter(Boolean);
@@ -48,14 +62,21 @@ function parseRecipeContent(content: string) {
     // Determine if this is ingredients or steps
     const headingLower = heading.toLowerCase();
 
-    if (headingLower === 'steps' || headingLower === 'instructions' || headingLower === 'directions' || headingLower === 'method') {
+    if (
+      headingLower === 'steps' ||
+      headingLower === 'instructions' ||
+      headingLower === 'directions' ||
+      headingLower === 'method'
+    ) {
       // Parse numbered steps
       const stepMatches = body.match(/^\d+\.\s+.+$/gm);
       if (stepMatches) {
         sections.push({
           type: 'steps',
           heading,
-          items: stepMatches.map((step) => step.replace(/^\d+\.\s+/, '').trim()),
+          items: stepMatches.map((step) =>
+            step.replace(/^\d+\.\s+/, '').trim()
+          ),
         });
       }
     } else if (body.includes('- ')) {
@@ -79,7 +100,9 @@ function parseRecipeContent(content: string) {
 }
 
 const parsedContent = parseRecipeContent(rawBody);
-const ingredientSections = parsedContent.filter((s) => s.type === 'ingredients');
+const ingredientSections = parsedContent.filter(
+  (s) => s.type === 'ingredients'
+);
 const stepsSections = parsedContent.filter((s) => s.type === 'steps');
 
 // Flatten all steps into a single array for cook mode
@@ -104,7 +127,8 @@ const allSteps = stepsSections.flatMap((section) => section.items);
         viewBox="0 0 24 24"
         stroke-width="2"
       >
-        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"
+        ></path>
       </svg>
       <span>Back to recipes</span>
     </a>
@@ -126,19 +150,17 @@ const allSteps = stepsSections.flatMap((section) => section.items);
           stroke-linecap="round"
           stroke-linejoin="round"
           d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-        />
+        ></path>
       </svg>
     </button>
   </div>
 
   {/* Hero Image */}
   <div class="max-w-5xl mx-auto px-4 mb-8">
-    <div class="relative aspect-[16/9] md:aspect-[21/9] rounded-2xl overflow-hidden bg-ctp-surface0">
-      <img
-        src={imagePath}
-        alt={title}
-        class="w-full h-full object-cover"
-      />
+    <div
+      class="relative aspect-[16/9] md:aspect-[21/9] rounded-2xl overflow-hidden bg-ctp-surface0"
+    >
+      <img src={imagePath} alt={title} class="w-full h-full object-cover" />
     </div>
   </div>
 
@@ -152,18 +174,45 @@ const allSteps = stepsSections.flatMap((section) => section.items);
     {/* Metadata badges */}
     <div class="flex flex-wrap gap-3 mb-4">
       {/* Prep time */}
-      <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-ctp-surface0 text-ctp-subtext1 text-sm">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      <div
+        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-ctp-surface0 text-ctp-subtext1 text-sm"
+      >
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
         </svg>
         <span>Prep: {prep_time} min</span>
       </div>
 
       {/* Cook time */}
-      <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-ctp-surface0 text-ctp-subtext1 text-sm">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
+      <div
+        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-ctp-surface0 text-ctp-subtext1 text-sm"
+      >
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"
+          ></path>
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"
+          ></path>
         </svg>
         <span>Cook: {cook_time} min</span>
       </div>
@@ -174,40 +223,57 @@ const allSteps = stepsSections.flatMap((section) => section.items);
 
     {/* Tags */}
     <div class="flex flex-wrap gap-2 mb-4">
-      {tags.map((tag) => (
-        <span class="px-3 py-1 text-sm font-medium rounded-full bg-ctp-green/20 text-ctp-green border border-ctp-green/30">
-          {tag.replace(/-/g, ' ')}
-        </span>
-      ))}
+      {
+        tags.map((tag) => (
+          <span class="px-3 py-1 text-sm font-medium rounded-full bg-ctp-green/20 text-ctp-green border border-ctp-green/30">
+            {tag.replace(/-/g, ' ')}
+          </span>
+        ))
+      }
     </div>
 
     {/* Source attribution */}
-    {source && (
-      <div class="text-sm text-ctp-subtext1">
-        Source: {source.url ? (
-          <a
-            href={source.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="text-ctp-sapphire hover:underline inline-flex items-center gap-1"
-          >
-            {source.name}
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
-          </a>
-        ) : (
-          <span>{source.name}</span>
-        )}
-      </div>
-    )}
+    {
+      source && (
+        <div class="text-sm text-ctp-subtext1">
+          Source:{' '}
+          {source.url ? (
+            <a
+              href={source.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-ctp-sapphire hover:underline inline-flex items-center gap-1"
+            >
+              {source.name}
+              <svg
+                class="w-3 h-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                />
+              </svg>
+            </a>
+          ) : (
+            <span>{source.name}</span>
+          )}
+        </div>
+      )
+    }
 
     {/* Cook Mode Button */}
-    {allSteps.length > 0 && (
-      <div class="mt-4">
-        <CookMode steps={allSteps} slug={slug} />
-      </div>
-    )}
+    {
+      allSteps.length > 0 && (
+        <div class="mt-4">
+          <CookMode steps={allSteps} slug={slug} />
+        </div>
+      )
+    }
   </div>
 
   {/* Main Content - Two columns on desktop */}
@@ -216,90 +282,142 @@ const allSteps = stepsSections.flatMap((section) => section.items);
       {/* Ingredients Column */}
       <div class="lg:col-span-4">
         <div class="lg:sticky lg:top-4">
-          <div class="bg-ctp-surface0 rounded-2xl p-6 border border-ctp-surface1">
-            <h2 class="text-xl font-semibold text-ctp-text mb-4 flex items-center gap-2">
-              <svg class="w-5 h-5 text-ctp-peach" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          <div
+            class="bg-ctp-surface0 rounded-2xl p-6 border border-ctp-surface1"
+          >
+            <h2
+              class="text-xl font-semibold text-ctp-text mb-4 flex items-center gap-2"
+            >
+              <svg
+                class="w-5 h-5 text-ctp-peach"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                ></path>
               </svg>
               Ingredients
             </h2>
 
-            {ingredientSections.map((section, sectionIndex) => (
-              <div class="mb-4 last:mb-0">
-                {section.heading.toLowerCase() !== 'ingredients' && (
-                  <h3 class="text-sm font-semibold text-ctp-subtext0 uppercase tracking-wide mb-2">
-                    {section.heading}
-                  </h3>
-                )}
-                <ul class="space-y-2 ingredient-list" data-section={sectionIndex}>
-                  {section.items.map((ingredient, index) => (
-                    <li class="flex items-start gap-3">
-                      <input
-                        type="checkbox"
-                        id={`ingredient-${sectionIndex}-${index}`}
-                        class="ingredient-checkbox mt-1 w-4 h-4 rounded border-ctp-surface2 bg-ctp-surface1 text-ctp-mauve focus:ring-ctp-mauve focus:ring-offset-0 cursor-pointer"
-                        data-slug={slug}
-                        data-section={sectionIndex}
-                        data-index={index}
-                      />
-                      <label
-                        for={`ingredient-${sectionIndex}-${index}`}
-                        class="ingredient-label text-ctp-text cursor-pointer select-none"
-                        data-original={ingredient}
-                        set:html={ingredient.replace(/`([^`]+)`/g, '<strong class="scalable-amount text-ctp-peach" data-original="$1">$1</strong>')}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+            {
+              ingredientSections.map((section, sectionIndex) => (
+                <div class="mb-4 last:mb-0">
+                  {section.heading.toLowerCase() !== 'ingredients' && (
+                    <h3 class="text-sm font-semibold text-ctp-subtext0 uppercase tracking-wide mb-2">
+                      {section.heading}
+                    </h3>
+                  )}
+                  <ul
+                    class="space-y-2 ingredient-list"
+                    data-section={sectionIndex}
+                  >
+                    {section.items.map((ingredient, index) => (
+                      <li class="flex items-start gap-3">
+                        <input
+                          type="checkbox"
+                          id={`ingredient-${sectionIndex}-${index}`}
+                          class="ingredient-checkbox mt-1 w-4 h-4 rounded border-ctp-surface2 bg-ctp-surface1 text-ctp-mauve focus:ring-ctp-mauve focus:ring-offset-0 cursor-pointer"
+                          data-slug={slug}
+                          data-section={sectionIndex}
+                          data-index={index}
+                        />
+                        <label
+                          for={`ingredient-${sectionIndex}-${index}`}
+                          class="ingredient-label text-ctp-text cursor-pointer select-none"
+                          data-original={ingredient}
+                          set:html={ingredient.replace(
+                            /`([^`]+)`/g,
+                            '<strong class="scalable-amount text-ctp-peach" data-original="$1">$1</strong>'
+                          )}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))
+            }
           </div>
         </div>
       </div>
 
       {/* Steps Column */}
       <div class="lg:col-span-8">
-        <h2 class="text-xl font-semibold text-ctp-text mb-6 flex items-center gap-2">
-          <svg class="w-5 h-5 text-ctp-mauve" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+        <h2
+          class="text-xl font-semibold text-ctp-text mb-6 flex items-center gap-2"
+        >
+          <svg
+            class="w-5 h-5 text-ctp-mauve"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
           </svg>
           Steps
         </h2>
 
         <ol class="space-y-6">
-          {stepsSections.flatMap((section) => section.items).map((step, index) => (
-            <li class="flex gap-4">
-              <div class="flex-shrink-0 w-8 h-8 rounded-full bg-ctp-mauve text-ctp-base flex items-center justify-center font-semibold text-sm">
-                {index + 1}
-              </div>
-              <div class="flex-1 pt-1">
-                <p class="text-ctp-text leading-relaxed">{step}</p>
-              </div>
-            </li>
-          ))}
+          {
+            stepsSections
+              .flatMap((section) => section.items)
+              .map((step, index) => (
+                <li class="flex gap-4">
+                  <div class="flex-shrink-0 w-8 h-8 rounded-full bg-ctp-mauve text-ctp-base flex items-center justify-center font-semibold text-sm">
+                    {index + 1}
+                  </div>
+                  <div class="flex-1 pt-1">
+                    <p class="text-ctp-text leading-relaxed">{step}</p>
+                  </div>
+                </li>
+              ))
+          }
         </ol>
       </div>
     </div>
   </div>
 
   {/* Tips/Notes Section */}
-  {notes && (
-    <div class="max-w-5xl mx-auto px-4 mb-12">
-      <div class="bg-ctp-yellow/10 border border-ctp-yellow/30 rounded-2xl p-6">
-        <h2 class="text-lg font-semibold text-ctp-yellow mb-3 flex items-center gap-2">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-          </svg>
-          Tips
-        </h2>
-        <div class="text-ctp-text prose prose-sm">
-          {notes.split('\n').filter(Boolean).map((tip) => (
-            <p class="mb-2 last:mb-0">{tip}</p>
-          ))}
+  {
+    notes && (
+      <div class="max-w-5xl mx-auto px-4 mb-12">
+        <div class="bg-ctp-yellow/10 border border-ctp-yellow/30 rounded-2xl p-6">
+          <h2 class="text-lg font-semibold text-ctp-yellow mb-3 flex items-center gap-2">
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+              />
+            </svg>
+            Tips
+          </h2>
+          <div class="text-ctp-text prose prose-sm">
+            {notes
+              .split('\n')
+              .filter(Boolean)
+              .map((tip) => (
+                <p class="mb-2 last:mb-0">{tip}</p>
+              ))}
+          </div>
         </div>
       </div>
-    </div>
-  )}
+    )
+  }
 
   {/* Placeholder for future comments/ratings */}
   <div class="max-w-5xl mx-auto px-4 pb-12">
@@ -349,7 +467,9 @@ const allSteps = stepsSections.flatMap((section) => section.items);
 <script>
   // Initialize favorites from localStorage
   function initFavorites() {
-    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]') as string[];
+    const favorites = JSON.parse(
+      localStorage.getItem('favorites') || '[]'
+    ) as string[];
     document.querySelectorAll('.favorite-btn').forEach((btn) => {
       const slug = (btn as HTMLElement).dataset.slug;
       if (slug && favorites.includes(slug)) {
@@ -361,7 +481,9 @@ const allSteps = stepsSections.flatMap((section) => section.items);
 
   // Toggle favorite status
   function toggleFavorite(slug: string, btn: HTMLElement) {
-    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]') as string[];
+    const favorites = JSON.parse(
+      localStorage.getItem('favorites') || '[]'
+    ) as string[];
     const index = favorites.indexOf(slug);
 
     if (index === -1) {
@@ -379,7 +501,9 @@ const allSteps = stepsSections.flatMap((section) => section.items);
 
   // Initialize ingredient checkboxes from localStorage
   function initIngredientCheckboxes() {
-    const checkboxes = document.querySelectorAll('.ingredient-checkbox') as NodeListOf<HTMLInputElement>;
+    const checkboxes = document.querySelectorAll(
+      '.ingredient-checkbox'
+    ) as NodeListOf<HTMLInputElement>;
 
     checkboxes.forEach((checkbox) => {
       const slug = checkbox.dataset.slug;
@@ -399,7 +523,12 @@ const allSteps = stepsSections.flatMap((section) => section.items);
   }
 
   // Save ingredient checkbox state to localStorage
-  function saveIngredientState(slug: string, section: string, index: string, isChecked: boolean) {
+  function saveIngredientState(
+    slug: string,
+    section: string,
+    index: string,
+    isChecked: boolean
+  ) {
     const key = `ingredients-${slug}`;
     const checked = JSON.parse(localStorage.getItem(key) || '{}');
     const itemKey = `${section}-${index}`;
@@ -415,7 +544,9 @@ const allSteps = stepsSections.flatMap((section) => section.items);
 
   // Event delegation for favorite button
   document.addEventListener('click', (e) => {
-    const btn = (e.target as HTMLElement).closest('.favorite-btn') as HTMLElement;
+    const btn = (e.target as HTMLElement).closest(
+      '.favorite-btn'
+    ) as HTMLElement;
     if (btn) {
       e.preventDefault();
       const slug = btn.dataset.slug;
@@ -450,7 +581,9 @@ const allSteps = stepsSections.flatMap((section) => section.items);
   });
 
   // Ingredient scaling functionality
-  function parseAmount(amountStr: string): { value: number; unit: string; original: string } | null {
+  function parseAmount(
+    amountStr: string
+  ): { value: number; unit: string; original: string } | null {
     // Handle fractions like "1/2", "1 1/2", etc.
     const fractionPattern = /^(\d+)?\s*(\d+)\/(\d+)\s*(.*)$/;
     const fractionMatch = amountStr.match(fractionPattern);

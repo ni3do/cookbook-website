@@ -12,25 +12,72 @@ const OUTPUT_DIR = 'src/content/recipes';
 
 // Valid tags from config.ts
 const VALID_TAGS = [
-  'italian', 'asian', 'mexican', 'mediterranean', 'american', 'french', 'indian', 'middle-eastern',
-  'breakfast', 'lunch', 'dinner', 'snack', 'dessert', 'appetizer',
-  'vegetarian', 'vegan', 'gluten-free', 'dairy-free', 'keto', 'low-carb',
-  'quick', 'weeknight', 'meal-prep', 'slow-cooker',
-  'comfort-food', 'healthy', 'one-pot', 'grilling', 'salad', 'soup', 'stew',
-  'chicken', 'beef', 'pork', 'fish', 'seafood', 'tofu', 'eggs',
-  'bread', 'cookies', 'cakes', 'pies', 'pastry', 'muffins', 'brownies', 'tarts', 'sourdough', 'no-knead', 'yeast-baking', 'quick-bread',
-  'summer', 'fall', 'winter', 'spring', 'holiday',
+  'italian',
+  'asian',
+  'mexican',
+  'mediterranean',
+  'american',
+  'french',
+  'indian',
+  'middle-eastern',
+  'breakfast',
+  'lunch',
+  'dinner',
+  'snack',
+  'dessert',
+  'appetizer',
+  'vegetarian',
+  'vegan',
+  'gluten-free',
+  'dairy-free',
+  'keto',
+  'low-carb',
+  'quick',
+  'weeknight',
+  'meal-prep',
+  'slow-cooker',
+  'comfort-food',
+  'healthy',
+  'one-pot',
+  'grilling',
+  'salad',
+  'soup',
+  'stew',
+  'chicken',
+  'beef',
+  'pork',
+  'fish',
+  'seafood',
+  'tofu',
+  'eggs',
+  'bread',
+  'cookies',
+  'cakes',
+  'pies',
+  'pastry',
+  'muffins',
+  'brownies',
+  'tarts',
+  'sourdough',
+  'no-knead',
+  'yeast-baking',
+  'quick-bread',
+  'summer',
+  'fall',
+  'winter',
+  'spring',
+  'holiday',
 ];
 
 // Map Obsidian tags to valid tags
 const TAG_MAP = {
-  'pasta': 'italian',
-  'pizza': 'italian',
-  'baked': 'dessert',
-  'desserts': 'dessert',
+  pasta: 'italian',
+  pizza: 'italian',
+  baked: 'dessert',
+  desserts: 'dessert',
   'main-dishes': 'dinner',
-  'sauce': 'dinner',
-  'sides': 'dinner',
+  sauce: 'dinner',
+  sides: 'dinner',
   'asian-food': 'asian',
 };
 
@@ -83,9 +130,12 @@ function transformContent(content) {
   transformed = transformed.replace(/## Instructions/g, '## Steps');
 
   // Remove checkboxes and wrap amounts in backticks
-  transformed = transformed.replace(/^- \[ \] (\d+[\d\/\.,]*\s*(?:g|kg|ml|l|tsp|tbsp|cup|cups|oz|lb|pinch|bunch)?)\s+/gm, (_, amount) => {
-    return `- \`${amount.trim()}\` `;
-  });
+  transformed = transformed.replace(
+    /^- \[ \] (\d+[\d\/\.,]*\s*(?:g|kg|ml|l|tsp|tbsp|cup|cups|oz|lb|pinch|bunch)?)\s+/gm,
+    (_, amount) => {
+      return `- \`${amount.trim()}\` `;
+    }
+  );
 
   // Handle remaining checkboxes without clear amounts
   transformed = transformed.replace(/^- \[ \] /gm, '- ');
@@ -146,7 +196,9 @@ function transformRecipe(filename, content) {
 
   // Build new frontmatter
   const newFrontmatter = {
-    title: frontmatter.title || slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+    title:
+      frontmatter.title ||
+      slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
     image: image,
     author: 'Simon',
     prep_time: parseInt(frontmatter['prep-time']) || 15,
@@ -190,7 +242,9 @@ function transformRecipe(filename, content) {
 }
 
 // Main
-const files = readdirSync(OBSIDIAN_DIR).filter(f => f.endsWith('.md') && f !== 'index.md');
+const files = readdirSync(OBSIDIAN_DIR).filter(
+  (f) => f.endsWith('.md') && f !== 'index.md'
+);
 
 console.log(`Found ${files.length} recipes to import:\n`);
 

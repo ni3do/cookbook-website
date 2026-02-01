@@ -31,7 +31,12 @@ function extractIngredients(body: string): string {
     const heading = lines[0].trim().toLowerCase();
 
     // Skip the steps/instructions section
-    if (heading === 'steps' || heading === 'instructions' || heading === 'directions' || heading === 'method') {
+    if (
+      heading === 'steps' ||
+      heading === 'instructions' ||
+      heading === 'directions' ||
+      heading === 'method'
+    ) {
       continue;
     }
 
@@ -67,7 +72,8 @@ function extractIngredients(body: string): string {
         Welcome to <span class="text-ctp-mauve">The Kyburz Table</span>
       </h1>
       <p class="text-lg text-ctp-subtext1 mb-8 max-w-2xl mx-auto">
-        A collection of tried and tested recipes for home cooks. Simple, delicious, and made with love.
+        A collection of tried and tested recipes for home cooks. Simple,
+        delicious, and made with love.
       </p>
 
       {/* Search Bar */}
@@ -83,8 +89,7 @@ function extractIngredients(body: string): string {
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
           </svg>
           <input
             type="search"
@@ -124,7 +129,10 @@ function extractIngredients(body: string): string {
     <div class="flex items-center justify-between mb-8">
       <h2 class="text-2xl font-bold text-ctp-text">
         <span id="grid-title">All Recipes</span>
-        <span id="recipe-count" class="text-ctp-subtext0 font-normal text-lg ml-2">
+        <span
+          id="recipe-count"
+          class="text-ctp-subtext0 font-normal text-lg ml-2"
+        >
           ({recipes.length})
         </span>
       </h2>
@@ -150,10 +158,7 @@ function extractIngredients(body: string): string {
     </div>
 
     {/* No Results Message */}
-    <div
-      id="no-results"
-      class="hidden text-center py-16"
-    >
+    <div id="no-results" class="hidden text-center py-16">
       <svg
         class="w-16 h-16 mx-auto text-ctp-overlay0 mb-4"
         fill="none"
@@ -164,8 +169,7 @@ function extractIngredients(body: string): string {
         <path
           stroke-linecap="round"
           stroke-linejoin="round"
-          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-        />
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
       </svg>
       <h3 class="text-xl font-semibold text-ctp-text mb-2">No recipes found</h3>
       <p class="text-ctp-subtext1">
@@ -183,7 +187,9 @@ function extractIngredients(body: string): string {
 
 <script>
   // Client-side search and filter functionality
-  const searchInput = document.getElementById('recipe-search') as HTMLInputElement;
+  const searchInput = document.getElementById(
+    'recipe-search'
+  ) as HTMLInputElement;
   const tagFilters = document.getElementById('tag-filters');
   const recipeGrid = document.getElementById('recipe-grid');
   const noResults = document.getElementById('no-results');
@@ -194,7 +200,9 @@ function extractIngredients(body: string): string {
   let searchQuery = '';
 
   function filterRecipes() {
-    const items = recipeGrid?.querySelectorAll('.recipe-item') as NodeListOf<HTMLElement>;
+    const items = recipeGrid?.querySelectorAll(
+      '.recipe-item'
+    ) as NodeListOf<HTMLElement>;
     let visibleCount = 0;
 
     items?.forEach((item) => {
@@ -203,10 +211,12 @@ function extractIngredients(body: string): string {
       const ingredients = item.dataset.ingredients || '';
 
       const query = searchQuery.toLowerCase();
-      const matchesSearch = searchQuery === '' ||
+      const matchesSearch =
+        searchQuery === '' ||
         title.includes(query) ||
         ingredients.includes(query);
-      const matchesTag = activeTag === 'all' || tags.split(',').includes(activeTag);
+      const matchesTag =
+        activeTag === 'all' || tags.split(',').includes(activeTag);
 
       if (matchesSearch && matchesTag) {
         item.classList.remove('hidden');
@@ -234,7 +244,9 @@ function extractIngredients(body: string): string {
       if (activeTag === 'all') {
         gridTitle.textContent = searchQuery ? `Search Results` : 'All Recipes';
       } else {
-        gridTitle.textContent = activeTag.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+        gridTitle.textContent = activeTag
+          .replace(/-/g, ' ')
+          .replace(/\b\w/g, (c) => c.toUpperCase());
       }
     }
   }
@@ -251,11 +263,29 @@ function extractIngredients(body: string): string {
     if (target.classList.contains('tag-pill')) {
       // Update active state
       tagFilters.querySelectorAll('.tag-pill').forEach((pill) => {
-        pill.classList.remove('active', 'bg-ctp-mauve', 'text-ctp-base', 'border-ctp-mauve');
-        pill.classList.add('bg-ctp-surface0', 'text-ctp-subtext1', 'border-ctp-surface1');
+        pill.classList.remove(
+          'active',
+          'bg-ctp-mauve',
+          'text-ctp-base',
+          'border-ctp-mauve'
+        );
+        pill.classList.add(
+          'bg-ctp-surface0',
+          'text-ctp-subtext1',
+          'border-ctp-surface1'
+        );
       });
-      target.classList.add('active', 'bg-ctp-mauve', 'text-ctp-base', 'border-ctp-mauve');
-      target.classList.remove('bg-ctp-surface0', 'text-ctp-subtext1', 'border-ctp-surface1');
+      target.classList.add(
+        'active',
+        'bg-ctp-mauve',
+        'text-ctp-base',
+        'border-ctp-mauve'
+      );
+      target.classList.remove(
+        'bg-ctp-surface0',
+        'text-ctp-subtext1',
+        'border-ctp-surface1'
+      );
 
       activeTag = target.dataset.tag || 'all';
       filterRecipes();

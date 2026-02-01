@@ -14,19 +14,21 @@ source:
 ![]()
 
 ## Ingredients
-- `10g` morels (Morcheln)  
-- ½ spring onion  
-- `10g` butter  
-- `0.5` dl white wine  
-- `0.5` dl veal or vegetable stock  
-- `1` dl cream (Saucen Halbrahm)  
+
+- `10g` morels (Morcheln)
+- ½ spring onion
+- `10g` butter
+- `0.5` dl white wine
+- `0.5` dl veal or vegetable stock
+- `1` dl cream (Saucen Halbrahm)
 
 ## Steps
-1. Wash the morels thoroughly.  
-2. Sauté the morels in butter.  
-3. Add the white part of the spring onion and cook briefly.  
-4. Add the white wine and let it boil down.  
-5. Add the stock and let it reduce by 50%.  
-6. Stir in the cream.  
-7. Cook for 1 minute.  
+
+1. Wash the morels thoroughly.
+2. Sauté the morels in butter.
+3. Add the white part of the spring onion and cook briefly.
+4. Add the white wine and let it boil down.
+5. Add the stock and let it reduce by 50%.
+6. Stir in the cream.
+7. Cook for 1 minute.
 8. Add the green part of the spring onion and season with salt and pepper to taste.
