@@ -6,9 +6,11 @@ interface Props {
   class?: string;
   averageRating?: number | null;
   ratingCount?: number;
+  /** Set to true for above-the-fold cards to improve LCP */
+  priority?: boolean;
 }
 
-const { recipe, class: className = '', averageRating = null, ratingCount = 0 } = Astro.props;
+const { recipe, class: className = '', averageRating = null, ratingCount = 0, priority = false } = Astro.props;
 const { data, slug } = recipe;
 const { title, image, prep_time, cook_time, tags } = data;
 
@@ -56,8 +58,9 @@ const hasRating = averageRating !== null && ratingCount > 0;
       <img
         src={imagePath}
         alt={title}
-        loading="lazy"
+        loading={priority ? 'eager' : 'lazy'}
         decoding="async"
+        fetchpriority={priority ? 'high' : undefined}
         class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
       />
     </div>

@@ -144,14 +144,14 @@ function extractIngredients(body: string): string {
       class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
     >
       {
-        recipes.map((recipe) => (
+        recipes.map((recipe, index) => (
           <div
             class="recipe-item"
             data-title={recipe.data.title.toLowerCase()}
             data-tags={recipe.data.tags.join(',')}
             data-ingredients={extractIngredients(recipe.body)}
           >
-            <RecipeCard recipe={recipe} />
+            <RecipeCard recipe={recipe} priority={index < 6} />
           </div>
         ))
       }
