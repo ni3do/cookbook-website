@@ -1,0 +1,88 @@
+---
+// OfflineIndicator.astro
+// Shows a banner when the user is offline, informing them they're viewing cached content
+---
+
+<div
+  id="offline-indicator"
+  class="offline-banner hidden fixed top-0 left-0 right-0 z-[100] bg-ctp-yellow text-ctp-base px-4 py-3 shadow-lg"
+  role="alert"
+  aria-live="polite"
+>
+  <div class="max-w-4xl mx-auto flex items-center justify-center gap-3">
+    <svg
+      class="w-5 h-5 flex-shrink-0"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      stroke-width="2"
+      aria-hidden="true"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3"
+      ></path>
+    </svg>
+    <span class="text-sm font-medium">
+      You're offline. Viewing cached content.
+    </span>
+  </div>
+</div>
+
+<script>
+  function initOfflineIndicator() {
+    const indicator = document.getElementById('offline-indicator');
+    if (!indicator) return;
+
+    function showBanner() {
+      indicator.classList.remove('hidden');
+      indicator.classList.add('offline-banner-visible');
+    }
+
+    function hideBanner() {
+      indicator.classList.add('offline-banner-hiding');
+      // Wait for animation to complete before hiding
+      setTimeout(() => {
+        indicator.classList.add('hidden');
+        indicator.classList.remove('offline-banner-visible', 'offline-banner-hiding');
+      }, 300);
+    }
+
+    function updateOnlineStatus() {
+      if (navigator.onLine) {
+        hideBanner();
+      } else {
+        showBanner();
+      }
+    }
+
+    // Set initial state
+    updateOnlineStatus();
+
+    // Listen for online/offline events
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+  }
+
+  // Initialize on page load
+  initOfflineIndicator();
+
+  // Re-initialize when navigating with View Transitions
+  document.addEventListener('astro:page-load', initOfflineIndicator);
+</script>
+
+<style>
+  .offline-banner {
+    transform: translateY(-100%);
+    transition: transform 0.3s ease-out;
+  }
+
+  .offline-banner-visible {
+    transform: translateY(0);
+  }
+
+  .offline-banner-hiding {
+    transform: translateY(-100%);
+  }
+</style>
