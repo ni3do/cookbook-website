@@ -1,0 +1,151 @@
+---
+/**
+ * RecipeSchema.astro - Generates Schema.org JSON-LD structured data for recipes.
+ *
+ * This component outputs a <script type="application/ld+json"> block with
+ * rich recipe data that search engines like Google can parse to display
+ * enhanced search results (rich snippets).
+ *
+ * @see https://schema.org/Recipe
+ * @see https://developers.google.com/search/docs/appearance/structured-data/recipe
+ */
+
+interface Props {
+  title: string;
+  author: string;
+  image: string;
+  prepTime: number; // minutes
+  cookTime: number; // minutes
+  servings: number;
+  ingredients: string[];
+  steps: string[];
+  tags?: string[];
+  notes?: string;
+  datePublished?: string;
+  aggregateRating?: {
+    ratingValue: number;
+    ratingCount: number;
+  } | null;
+}
+
+const {
+  title,
+  author,
+  image,
+  prepTime,
+  cookTime,
+  servings,
+  ingredients,
+  steps,
+  tags = [],
+  notes,
+  datePublished,
+  aggregateRating,
+} = Astro.props;
+
+/**
+ * Convert minutes to ISO 8601 duration format (e.g., PT25M, PT1H30M).
+ */
+function toISO8601Duration(minutes: number): string {
+  if (minutes <= 0) return 'PT0M';
+
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+
+  if (hours > 0 && mins > 0) {
+    return `PT${hours}H${mins}M`;
+  } else if (hours > 0) {
+    return `PT${hours}H`;
+  }
+  return `PT${mins}M`;
+}
+
+/**
+ * Build the absolute URL for the image.
+ */
+const siteUrl = Astro.site?.href || '';
+const absoluteImageUrl = image.startsWith('http')
+  ? image
+  : `${siteUrl.replace(/\/$/, '')}${image}`;
+
+/**
+ * Build HowToStep array for instructions.
+ */
+const howToSteps = steps.map((step, index) => ({
+  '@type': 'HowToStep',
+  name: `Step ${index + 1}`,
+  text: step,
+  position: index + 1,
+}));
+
+/**
+ * Build the schema object.
+ */
+const schema: Record<string, unknown> = {
+  '@context': 'https://schema.org/',
+  '@type': 'Recipe',
+  name: title,
+  author: {
+    '@type': 'Person',
+    name: author,
+  },
+  image: absoluteImageUrl,
+  prepTime: toISO8601Duration(prepTime),
+  cookTime: toISO8601Duration(cookTime),
+  totalTime: toISO8601Duration(prepTime + cookTime),
+  recipeYield: `${servings} servings`,
+  recipeIngredient: ingredients,
+  recipeInstructions: howToSteps,
+};
+
+// Add optional fields if present
+if (datePublished) {
+  schema.datePublished = datePublished;
+}
+
+if (tags.length > 0) {
+  schema.keywords = tags.join(', ');
+  // Map first tag to recipeCategory if it looks like a meal type
+  const mealTypes = ['breakfast', 'lunch', 'dinner', 'snack', 'dessert', 'appetizer'];
+  const mealTag = tags.find((tag) => mealTypes.includes(tag));
+  if (mealTag) {
+    schema.recipeCategory = mealTag.charAt(0).toUpperCase() + mealTag.slice(1);
+  }
+
+  // Map cuisine tags to recipeCuisine
+  const cuisines = [
+    'italian',
+    'asian',
+    'mexican',
+    'mediterranean',
+    'american',
+    'french',
+    'indian',
+    'middle-eastern',
+  ];
+  const cuisineTag = tags.find((tag) => cuisines.includes(tag));
+  if (cuisineTag) {
+    schema.recipeCuisine =
+      cuisineTag === 'middle-eastern'
+        ? 'Middle Eastern'
+        : cuisineTag.charAt(0).toUpperCase() + cuisineTag.slice(1);
+  }
+}
+
+if (notes) {
+  schema.description = notes.split('\n').filter(Boolean).join(' ').trim();
+}
+
+// Add aggregate rating if present and valid
+if (aggregateRating && aggregateRating.ratingCount > 0) {
+  schema.aggregateRating = {
+    '@type': 'AggregateRating',
+    ratingValue: aggregateRating.ratingValue.toFixed(1),
+    ratingCount: aggregateRating.ratingCount,
+    bestRating: 5,
+    worstRating: 1,
+  };
+}
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema, null, 2)} />

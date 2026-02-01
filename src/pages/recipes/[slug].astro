@@ -5,7 +5,9 @@ import CookMode from '../../components/CookMode.astro';
 import AddToShoppingListButton from '../../components/AddToShoppingListButton.astro';
 import Ratings from '../../components/Ratings.astro';
 import Comments from '../../components/Comments.astro';
+import RecipeSchema from '../../components/RecipeSchema.astro';
 import { getCollection, type CollectionEntry } from 'astro:content';
+import { getRatingStats } from '../../lib/ratings';
 
 // Prerender all recipe pages at build time
 export const prerender = true;
@@ -113,13 +115,43 @@ const allSteps = stepsSections.flatMap((section) => section.items);
 
 // Flatten all ingredients into a single array for shopping list
 const allIngredients = ingredientSections.flatMap((section) => section.items);
+
+// Clean ingredients for schema (remove markdown backticks used for scaling)
+const schemaIngredients = allIngredients.map((ing) => ing.replace(/`/g, ''));
+
+// Fetch rating stats for SEO schema (server-side)
+const ratingStats = getRatingStats(slug);
+const aggregateRating =
+  ratingStats && ratingStats.ratingCount > 0
+    ? {
+        ratingValue: ratingStats.averageRating!,
+        ratingCount: ratingStats.ratingCount,
+      }
+    : null;
 ---
 
 <BaseLayout
   title={title}
   description={`${title} by ${author} - ${totalTime} minutes`}
   image={imagePath}
+  author={author}
+  type="article"
 >
+  {/* Recipe Schema.org JSON-LD for SEO */}
+  <RecipeSchema
+    title={title}
+    author={author}
+    image={imagePath}
+    prepTime={prep_time}
+    cookTime={cook_time}
+    servings={servings}
+    ingredients={schemaIngredients}
+    steps={allSteps}
+    tags={tags}
+    notes={notes}
+    aggregateRating={aggregateRating}
+  />
+
   {/* Back Button and Favorite */}
   <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
     <a
