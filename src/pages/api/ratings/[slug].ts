@@ -1,10 +1,10 @@
 /**
- * Comments API Endpoint
+ * Ratings API Endpoint
  *
- * GET /api/comments/[slug] - Fetch all comments for a recipe
- * POST /api/comments/[slug] - Create a new comment for a recipe
+ * GET /api/ratings/[slug] - Fetch average rating and count for a recipe
+ * POST /api/ratings/[slug] - Submit a new rating for a recipe
  *
- * Returns comments ordered by created_at descending (newest first)
+ * Returns the average rating rounded to 1 decimal place and total count.
  */
 
 import type { APIRoute } from 'astro';
@@ -15,22 +15,27 @@ import {
   createRateLimitResponse,
 } from '../../../lib/rateLimit';
 
-/** Maximum allowed content length for comments */
-const MAX_CONTENT_LENGTH = 5000;
 /** Maximum allowed author name length */
 const MAX_AUTHOR_LENGTH = 100;
 
-/** Comment shape returned from the API */
-interface Comment {
-  id: number;
-  recipe_slug: string;
-  author_name: string;
-  content: string;
-  created_at: string;
+/** Rating statistics returned from the GET endpoint */
+interface RatingStats {
+  averageRating: number | null;
+  ratingCount: number;
+}
+
+/** Row shape from the aggregate query */
+interface RatingAggregateRow {
+  average_rating: number | null;
+  rating_count: number;
 }
 
 /**
- * GET handler - Fetch comments for a recipe
+ * GET handler - Fetch rating statistics for a recipe
+ *
+ * Returns:
+ * - averageRating: number (1 decimal place) or null if no ratings
+ * - ratingCount: number of ratings submitted
  */
 export const GET: APIRoute = async ({ params }) => {
   const { slug } = params;
@@ -45,26 +50,33 @@ export const GET: APIRoute = async ({ params }) => {
   try {
     const db = getDb();
 
-    const comments = db
+    const result = db
       .prepare(
-        `SELECT id, recipe_slug, author_name, content, created_at
-         FROM comments
-         WHERE recipe_slug = ?
-         ORDER BY created_at DESC`
+        `SELECT
+           ROUND(AVG(rating), 1) as average_rating,
+           COUNT(*) as rating_count
+         FROM ratings
+         WHERE recipe_slug = ?`
       )
-      .all(slug) as Comment[];
+      .get(slug) as RatingAggregateRow;
 
-    return new Response(JSON.stringify(comments), {
+    // When there are no ratings, COUNT returns 0 but AVG returns null
+    const stats: RatingStats = {
+      averageRating: result.rating_count > 0 ? result.average_rating : null,
+      ratingCount: result.rating_count,
+    };
+
+    return new Response(JSON.stringify(stats), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Failed to fetch comments:', error);
+    console.error('Failed to fetch ratings:', error);
 
     const message =
       error instanceof DatabaseError
         ? 'Database connection error'
-        : 'Failed to fetch comments';
+        : 'Failed to fetch ratings';
 
     return new Response(JSON.stringify({ error: message }), {
       status: 500,
@@ -73,20 +85,22 @@ export const GET: APIRoute = async ({ params }) => {
   }
 };
 
-/** Request body for creating a comment */
-interface CreateCommentRequest {
+/** Request body for creating a rating */
+interface CreateRatingRequest {
   author_name: string;
-  content: string;
+  rating: number;
   honeypot?: string; // Should be empty - filled by bots
 }
 
 /**
- * POST handler - Create a new comment for a recipe
+ * POST handler - Submit a new rating for a recipe
  *
  * Expects JSON body with:
  * - author_name: string (required)
- * - content: string (required)
+ * - rating: number 1-5 (required)
  * - honeypot: string (optional, should be empty)
+ *
+ * Returns the updated average rating and count after submission.
  */
 export const POST: APIRoute = async ({ params, request }) => {
   const { slug } = params;
@@ -106,7 +120,7 @@ export const POST: APIRoute = async ({ params, request }) => {
     return createRateLimitResponse(rateLimitResult.resetMs);
   }
 
-  let body: CreateCommentRequest;
+  let body: CreateRatingRequest;
   try {
     body = await request.json();
   } catch {
@@ -119,10 +133,13 @@ export const POST: APIRoute = async ({ params, request }) => {
   // Honeypot check - if filled, it's likely a bot
   if (body.honeypot && body.honeypot.trim() !== '') {
     // Return success to not reveal the spam detection
-    return new Response(JSON.stringify({ id: 0, message: 'Comment received' }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ averageRating: 0, ratingCount: 0, message: 'Rating received' }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   }
 
   // Validate required fields
@@ -136,12 +153,12 @@ export const POST: APIRoute = async ({ params, request }) => {
     errors.push(`author_name must be ${MAX_AUTHOR_LENGTH} characters or less`);
   }
 
-  if (!body.content || typeof body.content !== 'string') {
-    errors.push('content is required');
-  } else if (body.content.trim().length === 0) {
-    errors.push('content cannot be empty');
-  } else if (body.content.length > MAX_CONTENT_LENGTH) {
-    errors.push(`content must be ${MAX_CONTENT_LENGTH} characters or less`);
+  if (body.rating === undefined || body.rating === null) {
+    errors.push('rating is required');
+  } else if (typeof body.rating !== 'number' || !Number.isInteger(body.rating)) {
+    errors.push('rating must be an integer');
+  } else if (body.rating < 1 || body.rating > 5) {
+    errors.push('rating must be between 1 and 5');
   }
 
   if (errors.length > 0) {
@@ -151,32 +168,46 @@ export const POST: APIRoute = async ({ params, request }) => {
     });
   }
 
-  // Sanitize inputs (trim whitespace)
+  // Sanitize inputs
   const authorName = body.author_name.trim();
-  const content = body.content.trim();
+  const rating = body.rating;
 
   try {
     const db = getDb();
 
+    // Insert the new rating
+    db.prepare(
+      `INSERT INTO ratings (recipe_slug, author_name, rating)
+       VALUES (?, ?, ?)`
+    ).run(slug, authorName, rating);
+
+    // Fetch updated aggregate stats
     const result = db
       .prepare(
-        `INSERT INTO comments (recipe_slug, author_name, content)
-         VALUES (?, ?, ?)
-         RETURNING id, recipe_slug, author_name, content, created_at`
+        `SELECT
+           ROUND(AVG(rating), 1) as average_rating,
+           COUNT(*) as rating_count
+         FROM ratings
+         WHERE recipe_slug = ?`
       )
-      .get(slug, authorName, content) as Comment;
+      .get(slug) as RatingAggregateRow;
 
-    return new Response(JSON.stringify(result), {
+    const stats: RatingStats = {
+      averageRating: result.average_rating,
+      ratingCount: result.rating_count,
+    };
+
+    return new Response(JSON.stringify(stats), {
       status: 201,
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Failed to create comment:', error);
+    console.error('Failed to create rating:', error);
 
     const message =
       error instanceof DatabaseError
         ? 'Database connection error'
-        : 'Failed to create comment';
+        : 'Failed to create rating';
 
     return new Response(JSON.stringify({ error: message }), {
       status: 500,
