@@ -28,12 +28,12 @@ const SCRAPE_RATE_LIMIT = {
   windowMs: 60 * 1000, // 1 minute
 };
 
-/** Timeout for fetching external URLs (10 seconds) */
-const FETCH_TIMEOUT_MS = 10 * 1000;
+/** Timeout for fetching external URLs (15 seconds) */
+const FETCH_TIMEOUT_MS = 15 * 1000;
 
 /** User-Agent header for requests */
 const USER_AGENT =
-  'Mozilla/5.0 (compatible; RecipeScraper/1.0; +https://github.com/kyburz-switzerland/cookbook)';
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
 
 /** Maximum image size to download (10MB) */
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
@@ -86,7 +86,8 @@ async function fetchHtml(url: string): Promise<string> {
       signal: controller.signal,
       headers: {
         'User-Agent': USER_AGENT,
-        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        Accept:
+          'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.5',
       },
     });
@@ -97,7 +98,10 @@ async function fetchHtml(url: string): Promise<string> {
 
     // Verify we got HTML content
     const contentType = response.headers.get('content-type') || '';
-    if (!contentType.includes('text/html') && !contentType.includes('application/xhtml')) {
+    if (
+      !contentType.includes('text/html') &&
+      !contentType.includes('application/xhtml')
+    ) {
       throw new Error('Response is not HTML');
     }
 
@@ -177,7 +181,9 @@ async function fetchWithRetry(
 
     // Wait before retry (exponential backoff: 500ms, 1000ms)
     if (attempt < retries) {
-      await new Promise((resolve) => setTimeout(resolve, 500 * Math.pow(2, attempt)));
+      await new Promise((resolve) =>
+        setTimeout(resolve, 500 * Math.pow(2, attempt))
+      );
     }
   }
 
@@ -232,7 +238,12 @@ async function downloadAndProcessImage(
     const slug = `scrape-${timestamp}`;
 
     // Determine output directory
-    const outputDir = path.join(process.cwd(), 'public', 'images', 'submissions');
+    const outputDir = path.join(
+      process.cwd(),
+      'public',
+      'images',
+      'submissions'
+    );
 
     // Create directory if it doesn't exist
     if (!fs.existsSync(outputDir)) {
@@ -312,7 +323,10 @@ export const GET: APIRoute = async ({ request }) => {
 
   // Validate URL format (must be HTTP/HTTPS)
   if (!isValidUrl(targetUrl)) {
-    return jsonResponse({ error: 'Invalid URL. Must be a valid HTTP or HTTPS URL.' }, 400);
+    return jsonResponse(
+      { error: 'Invalid URL. Must be a valid HTTP or HTTPS URL.' },
+      400
+    );
   }
 
   // Fetch HTML from the target URL
@@ -324,7 +338,10 @@ export const GET: APIRoute = async ({ request }) => {
 
     // Handle specific error cases
     if (message.includes('abort') || message.includes('timeout')) {
-      return jsonResponse({ error: 'Request timed out. The website took too long to respond.' }, 502);
+      return jsonResponse(
+        { error: 'Request timed out. The website took too long to respond.' },
+        502
+      );
     }
 
     return jsonResponse({ error: `Could not fetch URL: ${message}` }, 502);
