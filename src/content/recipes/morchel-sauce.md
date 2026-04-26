@@ -11,16 +11,14 @@ source:
   url: 'https://www.bettybossi.ch/de/rezepte/rezept/morchelsauce-10000406/?srsltid=AfmBOoqqvQVNudr6r7BLtmOQq6ir2VjDWB0aGq2ON6BgYEHNBWO37KVs'
 ---
 
-![]()
-
 ## Ingredients
 
 - `10g` morels (Morcheln)
-- ½ spring onion
+- `½` spring onion
 - `10g` butter
-- `0.5` dl white wine
-- `0.5` dl veal or vegetable stock
-- `1` dl cream (Saucen Halbrahm)
+- `50ml` white wine
+- `50ml` veal or vegetable stock
+- `100ml` cream (Saucen Halbrahm)
 
 ## Steps
 

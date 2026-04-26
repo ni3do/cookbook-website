@@ -21,18 +21,18 @@ source:
 - `3 tbsp` lemon juice
 - `1 tbsp` extra virgin olive oil
 - `3 tbsp` Greek yogurt, preferably full fat
-- 1½ tbsp dried oregano
+- `1½ tbsp` dried oregano
 - `1 tsp` salt
 - Black pepper, to taste
 
 ## Tzatziki
 
 - `2` cucumbers (to yield ½–¾ cup grated cucumber after squeezing out juice)
-- 1¼ cups Greek yogurt, preferably full fat
+- `1¼ cups` Greek yogurt, preferably full fat
 - `1 tbsp` lemon juice
 - `1 tbsp` extra virgin olive oil (more if you want it richer)
 - `1` garlic clove, minced
-- ¼ tsp salt
+- `¼ tsp` salt
 - Black pepper, to taste
 
 ## To Serve

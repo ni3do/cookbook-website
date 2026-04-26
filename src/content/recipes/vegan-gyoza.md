@@ -5,7 +5,7 @@ author: 'Simon'
 prep_time: 60
 cook_time: 30
 servings: 4
-tags: []
+tags: [vegan, vegetarian, asian]
 source:
   name: 'Fooby'
   url: 'https://fooby.ch/de/rezepte/16713/vegane-gyoza'
@@ -16,8 +16,8 @@ source:
 ## Dough
 
 - `240g` white flour
-- ½ tsp salt
-- 1½ dl hot water
+- `½ tsp` salt
+- `150ml` hot water
 
 ## Filling
 
@@ -31,7 +31,7 @@ source:
 - `1` carrot, coarsely grated
 - `1 tbsp` rice vinegar
 - `1 tsp` sesame oil
-- ¼ tsp salt
+- `¼ tsp` salt
 
 ## Steps
 

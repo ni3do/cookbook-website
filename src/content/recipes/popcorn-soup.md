@@ -13,9 +13,9 @@ source:
 
 ## Ingredients
 
-- ½ onion, chopped
+- `½` onion, chopped
 - `50g` butter
-- ½ tbsp dried parsley
+- `½ tbsp` dried parsley
 - `15g` all-purpose flour
 - `1l` half-and-half cream (or a mix of milk and cream)
 - `1` can full kernel corn, drained

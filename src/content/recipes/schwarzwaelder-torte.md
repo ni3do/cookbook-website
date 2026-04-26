@@ -1,6 +1,6 @@
 ---
 title: 'Black Forest Cake (Schwarzwälder Kirschtorte)'
-image: 'schwazwaelder-torte.jpg'
+image: 'schwarzwaelder-torte.jpg'
 author: 'Simon'
 prep_time: 60
 cook_time: 20
@@ -26,7 +26,7 @@ source:
 
 - `1` jar sour cherries (drained weight: 350g)
 - `2 tbsp` cornstarch
-- 1L heavy cream
+- `1L` heavy cream
 - `5` packets whipped cream stabilizer
 - `1 tbsp` sugar
 - `9 tbsp` kirsch (cherry brandy)

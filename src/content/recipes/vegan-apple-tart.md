@@ -5,7 +5,7 @@ author: 'Simon'
 prep_time: 60
 cook_time: 30
 servings: 4
-tags: []
+tags: [vegan, vegetarian, dessert, tarts]
 source:
   name: 'Kuechengoetter'
   url: 'https://www.kuechengoetter.de/rezepte/klassische-apfelwaehe-98465'
@@ -25,14 +25,14 @@ source:
 
 ## Belag
 
-- 3-4 Äpfel (je nach Grösse)
-- etwas Zitronensaft
-- Pflanzencreme
-- vegane Sauerrahmalternative (oder Soja-Joghurt)
+- `3-4` Äpfel (je nach Grösse)
+- `1 tbsp` Zitronensaft
+- `100ml` Pflanzencreme
+- `150g` vegane Sauerrahmalternative (oder Soja-Joghurt)
 - `3` EL Rohrohrzucker
 - `3` TL Stärke
 - `1` TL Zimtpulver
-- ½ TL gemahlene Vanille
+- `½ TL` gemahlene Vanille
 
 ## Steps
 

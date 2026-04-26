@@ -16,9 +16,9 @@ source:
 - `2` egg yolks
 - `80g` butter
 - `1` teaspoon dijon mustard
-- some lemon juice
-- some salt
-- pinch of pepper
+- `1 tbsp` lemon juice
+- `¼ tsp` salt
+- `1 pinch` pepper
 
 ## Steps
 

@@ -1,6 +1,6 @@
 ---
 title: 'Fior di Latte Ice Cream'
-image: 'fiod-di-latte-ice-cream.png'
+image: 'fior-di-latte-ice-cream.png'
 author: 'Simon'
 prep_time: 15
 cook_time: 30

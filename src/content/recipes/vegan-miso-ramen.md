@@ -13,14 +13,14 @@ source:
 
 ## Ingredients
 
-- ½ onion
-- 1½ garlic cloves
+- `½` onion
+- `1½` garlic cloves
 - `15g` ginger
-- ½ chili
+- `½` chili
 - `100g` fresh shiitake mushrooms (or 60g dried)
-- `2` EL sesame oil
-- `2` EL soy sauce
-- 1½ EL mirin (or 60ml)
+- `2 tbsp` sesame oil
+- `2 tbsp` soy sauce
+- `1½ tbsp` mirin (or 60ml)
 - `0.9l` vegetable broth
 - `15g` light miso paste
 - `100g` unsweetened soja drink

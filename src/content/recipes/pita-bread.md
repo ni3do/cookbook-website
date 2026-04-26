@@ -14,11 +14,11 @@ source:
 ## Ingredients
 
 - `250g` wheat flour
-- ½ packet dry yeast (approx. 3.5g)
-- ¼ tsp sugar
+- `½ packet` dry yeast (approx. 3.5g)
+- `¼ tsp` sugar
 - `165ml` lukewarm water (approximate)
-- ½ tbsp olive oil or rapeseed oil
-- ¾ tsp salt (leveled)
+- `½ tbsp` olive oil or rapeseed oil
+- `¾ tsp` salt (leveled)
 
 ## Steps
 
