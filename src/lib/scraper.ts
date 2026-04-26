@@ -33,7 +33,7 @@ export interface ScrapedRecipe {
   prepTime?: number; // minutes
   cookTime?: number; // minutes
   servings?: number;
-  ingredients: Array<{ amount: string; name: string }>;
+  ingredients: ParsedIngredient[];
   steps: string[];
   imageUrl?: string; // External URL (will be downloaded)
   imagePath?: string; // Local path after download
@@ -363,7 +363,9 @@ export const INGREDIENT_DENSITY: Record<string, number> = {
  * parseDuration('PT2H15M')  // 135
  * parseDuration('45')       // 45 (fallback for plain numbers)
  */
-export function parseDuration(duration: string | undefined | null): number | undefined {
+export function parseDuration(
+  duration: string | undefined | null
+): number | undefined {
   if (!duration) return undefined;
 
   // Handle plain numbers (some sites just use "30" for 30 minutes)
@@ -400,7 +402,9 @@ export function replaceWordNumbers(text: string): string {
 
   // Sort by length descending to replace longer words first
   // (e.g., "eleven" before "one" to avoid partial matches)
-  const sortedWords = Object.keys(WORD_NUMBERS).sort((a, b) => b.length - a.length);
+  const sortedWords = Object.keys(WORD_NUMBERS).sort(
+    (a, b) => b.length - a.length
+  );
 
   for (const word of sortedWords) {
     // Word boundary match, case-insensitive
@@ -446,7 +450,9 @@ export function replaceFractions(text: string): string {
 
   // Finally, replace standalone fractions
   // Sort by length descending to handle "1/2" before trying to match parts
-  const sortedFractions = Object.keys(FRACTIONS).sort((a, b) => b.length - a.length);
+  const sortedFractions = Object.keys(FRACTIONS).sort(
+    (a, b) => b.length - a.length
+  );
 
   for (const fraction of sortedFractions) {
     const decimal = FRACTIONS[fraction];
@@ -490,7 +496,15 @@ export function normalizeUnit(unit: string): string | null {
 }
 
 /** Imperial volume units that need conversion to metric */
-const IMPERIAL_VOLUME_UNITS = new Set(['tsp', 'tbsp', 'fl oz', 'cup', 'pint', 'quart', 'gallon']);
+const IMPERIAL_VOLUME_UNITS = new Set([
+  'tsp',
+  'tbsp',
+  'fl oz',
+  'cup',
+  'pint',
+  'quart',
+  'gallon',
+]);
 
 /** Imperial weight units that need conversion to metric */
 const IMPERIAL_WEIGHT_UNITS = new Set(['oz', 'lb']);
@@ -525,7 +539,9 @@ export function isImperialUnit(unit: string): boolean {
  * findIngredientDensity('brown sugar')               // 220
  * findIngredientDensity('mystery ingredient')        // undefined
  */
-export function findIngredientDensity(ingredientName: string): number | undefined {
+export function findIngredientDensity(
+  ingredientName: string
+): number | undefined {
   const normalized = ingredientName.toLowerCase().trim();
 
   // 1. Try exact match
@@ -535,11 +551,16 @@ export function findIngredientDensity(ingredientName: string): number | undefine
 
   // 2. Try matching any density key as a substring of the ingredient
   // Sort keys by length (longest first) to match more specific ingredients first
-  const sortedKeys = Object.keys(INGREDIENT_DENSITY).sort((a, b) => b.length - a.length);
+  const sortedKeys = Object.keys(INGREDIENT_DENSITY).sort(
+    (a, b) => b.length - a.length
+  );
 
   for (const key of sortedKeys) {
     // Check if the key appears as a whole word in the ingredient name
-    const keyRegex = new RegExp(`\\b${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+    const keyRegex = new RegExp(
+      `\\b${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`,
+      'i'
+    );
     if (keyRegex.test(normalized)) {
       return INGREDIENT_DENSITY[key];
     }
@@ -604,7 +625,11 @@ function parseAmountValue(amountStr: string): number | null {
 /**
  * Formats a range after conversion, preserving the range notation.
  */
-function formatRange(amountStr: string, conversionFactor: number, suffix: string): string {
+function formatRange(
+  amountStr: string,
+  conversionFactor: number,
+  suffix: string
+): string {
   const rangeMatch = amountStr.match(/^([\d.]+)\s*(-|to)\s*([\d.]+)$/i);
   if (rangeMatch) {
     const low = parseFloat(rangeMatch[1]) * conversionFactor;
@@ -938,9 +963,12 @@ interface SchemaInstruction {
  *   console.log(recipe.title); // "Lemon Pasta"
  * }
  */
-export function extractJsonLd(html: string): Omit<ScrapedRecipe, 'sourceUrl'> | null {
+export function extractJsonLd(
+  html: string
+): Omit<ScrapedRecipe, 'sourceUrl'> | null {
   // Find all JSON-LD script tags
-  const jsonLdRegex = /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+  const jsonLdRegex =
+    /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
   let match;
 
   while ((match = jsonLdRegex.exec(html)) !== null) {
@@ -976,7 +1004,10 @@ function findRecipeInJsonLd(data: unknown): SchemaRecipe | null {
   }
 
   // Check @graph array
-  if ('@graph' in data && Array.isArray((data as { '@graph': unknown[] })['@graph'])) {
+  if (
+    '@graph' in data &&
+    Array.isArray((data as { '@graph': unknown[] })['@graph'])
+  ) {
     for (const item of (data as { '@graph': unknown[] })['@graph']) {
       if (isRecipeType(item)) {
         return item as SchemaRecipe;
@@ -1010,14 +1041,18 @@ function isRecipeType(obj: unknown): boolean {
     return false;
   }
 
-  const types = Array.isArray(typed['@type']) ? typed['@type'] : [typed['@type']];
+  const types = Array.isArray(typed['@type'])
+    ? typed['@type']
+    : [typed['@type']];
   return types.some((t) => t === 'Recipe' || t === 'https://schema.org/Recipe');
 }
 
 /**
  * Converts a Schema.org Recipe to our ScrapedRecipe format.
  */
-function parseSchemaRecipe(schema: SchemaRecipe): Omit<ScrapedRecipe, 'sourceUrl'> {
+function parseSchemaRecipe(
+  schema: SchemaRecipe
+): Omit<ScrapedRecipe, 'sourceUrl'> {
   return {
     title: schema.name || 'Untitled Recipe',
     description: schema.description,
@@ -1033,7 +1068,9 @@ function parseSchemaRecipe(schema: SchemaRecipe): Omit<ScrapedRecipe, 'sourceUrl
 /**
  * Parses recipeYield to a number of servings.
  */
-function parseServings(yield_: string | number | string[] | undefined): number | undefined {
+function parseServings(
+  yield_: string | number | string[] | undefined
+): number | undefined {
   if (yield_ === undefined) {
     return undefined;
   }
@@ -1058,18 +1095,12 @@ function parseServings(yield_: string | number | string[] | undefined): number |
  */
 function parseIngredients(
   ingredients: string[] | undefined
-): Array<{ amount: string; name: string }> {
+): ParsedIngredient[] {
   if (!ingredients || !Array.isArray(ingredients)) {
     return [];
   }
 
-  return ingredients.map((text) => {
-    const parsed = parseIngredient(text);
-    return {
-      amount: parsed.amount,
-      name: parsed.name,
-    };
-  });
+  return ingredients.map((text) => parseIngredient(text));
 }
 
 /**

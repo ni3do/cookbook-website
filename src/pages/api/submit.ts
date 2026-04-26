@@ -102,6 +102,13 @@ export const POST: APIRoute = async ({ request }) => {
   if (!title) errors.push('Recipe title is required');
   if (!description) errors.push('Description is required');
 
+  // Validate image
+  const hasScrapedImage = getString(formData, 'scraped_image_path');
+  const imageFile = formData.get('image') as File | null;
+  if ((!imageFile || imageFile.size === 0) && !hasScrapedImage) {
+    errors.push('A recipe photo is required');
+  }
+
   // Optional numeric fields
   const prepTime = getNumber(formData, 'prep_time');
   const cookTime = getNumber(formData, 'cook_time');

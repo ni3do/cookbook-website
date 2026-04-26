@@ -29,8 +29,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <span
             class="w-8 h-8 rounded-full bg-ctp-sapphire/20 text-ctp-sapphire flex items-center justify-center text-sm font-bold"
           >
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+              ></path>
             </svg>
           </span>
           Import from URL
@@ -48,12 +58,38 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             id="import-btn"
             class="px-6 py-3 bg-ctp-sapphire hover:bg-ctp-sapphire/90 text-ctp-base font-bold rounded-xl transition-colors flex items-center gap-2"
           >
-            <svg id="import-icon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            <svg
+              id="import-icon"
+              class="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+              ></path>
             </svg>
-            <svg id="import-spinner" class="w-5 h-5 animate-spin hidden" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <svg
+              id="import-spinner"
+              class="w-5 h-5 animate-spin hidden"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
             </svg>
             <span id="import-btn-text">Import</span>
           </button>
@@ -66,35 +102,68 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <div class="w-full border-t border-ctp-surface2"></div>
         </div>
         <div class="relative flex justify-center">
-          <span class="px-4 bg-ctp-surface0 text-sm text-ctp-overlay0">or enter manually</span>
+          <span class="px-4 bg-ctp-surface0 text-sm text-ctp-overlay0"
+            >or enter manually</span
+          >
         </div>
       </div>
 
       <!-- Ingredient Review Modal -->
       <div id="ingredient-review-modal" class="fixed inset-0 z-50 hidden">
-        <div class="fixed inset-0 bg-ctp-crust/80 backdrop-blur-sm" id="modal-backdrop"></div>
+        <div
+          class="fixed inset-0 bg-ctp-crust/80 backdrop-blur-sm"
+          id="modal-backdrop"
+        >
+        </div>
         <div class="fixed inset-0 flex items-center justify-center p-4">
-          <div class="bg-ctp-surface0 rounded-2xl border border-ctp-surface1 shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+          <div
+            class="bg-ctp-surface0 rounded-2xl border border-ctp-surface1 shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col"
+          >
             <div class="p-6 border-b border-ctp-surface1">
-              <h3 class="text-xl font-bold text-ctp-text">Review Converted Ingredients</h3>
-              <p class="text-sm text-ctp-subtext1 mt-1">We've converted units to metric. Please review:</p>
+              <h3 class="text-xl font-bold text-ctp-text">
+                Review Converted Ingredients
+              </h3>
+              <p class="text-sm text-ctp-subtext1 mt-1">
+                We've converted units to metric. Please review:
+              </p>
             </div>
-            <div id="modal-ingredients-list" class="flex-1 overflow-y-auto p-6 space-y-3">
+            <div
+              id="modal-ingredients-list"
+              class="flex-1 overflow-y-auto p-6 space-y-3"
+            >
               <!-- Ingredient review rows will be added dynamically -->
             </div>
             <div class="p-6 border-t border-ctp-surface1 bg-ctp-mantle">
               <div class="flex items-center justify-between">
                 <p class="text-xs text-ctp-overlay0 flex items-center gap-1">
-                  <svg class="w-4 h-4 text-ctp-yellow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  <svg
+                    class="w-4 h-4 text-ctp-yellow"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    ></path>
                   </svg>
                   = low confidence conversion, please verify
                 </p>
                 <div class="flex gap-3">
-                  <button type="button" id="modal-cancel" class="px-4 py-2 text-ctp-subtext1 hover:text-ctp-text hover:bg-ctp-surface1 rounded-lg transition-colors">
+                  <button
+                    type="button"
+                    id="modal-cancel"
+                    class="px-4 py-2 text-ctp-subtext1 hover:text-ctp-text hover:bg-ctp-surface1 rounded-lg transition-colors"
+                  >
                     Cancel
                   </button>
-                  <button type="button" id="modal-confirm" class="px-4 py-2 bg-ctp-sapphire hover:bg-ctp-sapphire/90 text-ctp-base font-bold rounded-lg transition-colors">
+                  <button
+                    type="button"
+                    id="modal-confirm"
+                    class="px-4 py-2 bg-ctp-sapphire hover:bg-ctp-sapphire/90 text-ctp-base font-bold rounded-lg transition-colors"
+                  >
                     Confirm & Import
                   </button>
                 </div>
@@ -221,7 +290,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             class="w-8 h-8 rounded-full bg-ctp-blue/20 text-ctp-blue flex items-center justify-center text-sm font-bold"
             >2</span
           >
-          Recipe Photo
+          Recipe Photo <span class="text-ctp-red">*</span>
         </h2>
 
         <div
@@ -668,7 +737,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       if (number) {
         number.textContent = String(index + 1);
       }
+      const textarea = step.querySelector('textarea');
+      if (textarea) {
+        textarea.name = `step_${index + 1}`;
+      }
     });
+    stepIndex = steps?.length || 0;
   }
 
   if (stepsContainer && addStepBtn) {
@@ -686,7 +760,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         const row = removeBtn.closest('.step-row');
         if (row && stepsContainer.children.length > 1) {
           row.remove();
-          stepIndex--;
           renumberSteps();
         }
       }
@@ -702,6 +775,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     'american',
     'french',
     'indian',
+    'middle-eastern',
     'breakfast',
     'lunch',
     'dinner',
@@ -737,6 +811,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     'cakes',
     'pies',
     'pastry',
+    'muffins',
+    'brownies',
+    'tarts',
+    'sourdough',
+    'no-knead',
+    'yeast-baking',
+    'quick-bread',
     'summer',
     'fall',
     'winter',
@@ -814,6 +895,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         if (captchaAnswerInput) {
           captchaAnswerInput.value = String(answer);
         }
+        const captchaInputEarly = document.getElementById(
+          'captcha'
+        ) as HTMLInputElement;
+        if (captchaInputEarly) captchaInputEarly.value = '';
         return;
       case '*':
         answer = num1 * num2;
@@ -827,6 +912,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     if (captchaAnswerInput) {
       captchaAnswerInput.value = String(answer);
     }
+
+    const captchaInput = document.getElementById('captcha') as HTMLInputElement;
+    if (captchaInput) captchaInput.value = '';
   }
 
   generateCaptcha();
@@ -883,6 +971,24 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
+      // Validate image is provided
+      const imageInput = document.getElementById(
+        'image'
+      ) as HTMLInputElement | null;
+      const hasUploadedImage = imageInput?.files && imageInput.files.length > 0;
+      const scrapedImageInput = document.getElementById(
+        'scraped_image_path'
+      ) as HTMLInputElement | null;
+      const hasScrapedImage =
+        scrapedImageInput?.value && scrapedImageInput.value.trim() !== '';
+      if (!hasUploadedImage && !hasScrapedImage) {
+        showMessage(
+          'A recipe photo is required. Please upload an image.',
+          'error'
+        );
+        return;
+      }
+
       // Show loading state
       if (submitButton) {
         submitButton.disabled = true;
@@ -899,7 +1005,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           body: formData,
         });
 
-        const result = await response.json();
+        let result;
+        try {
+          result = await response.json();
+        } catch {
+          showMessage('Submission failed. Please try again.', 'error');
+          generateCaptcha();
+          return;
+        }
 
         if (!response.ok) {
           const errorMessages =
@@ -974,15 +1087,21 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   // Import from URL functionality
   // ─────────────────────────────────────────────────────────────────────────────
 
-  const importUrlInput = document.getElementById('import_url') as HTMLInputElement;
+  const importUrlInput = document.getElementById(
+    'import_url'
+  ) as HTMLInputElement;
   const importBtn = document.getElementById('import-btn') as HTMLButtonElement;
   const importIcon = document.getElementById('import-icon');
   const importSpinner = document.getElementById('import-spinner');
   const importBtnText = document.getElementById('import-btn-text');
 
   // Modal elements
-  const ingredientReviewModal = document.getElementById('ingredient-review-modal');
-  const modalIngredientsList = document.getElementById('modal-ingredients-list');
+  const ingredientReviewModal = document.getElementById(
+    'ingredient-review-modal'
+  );
+  const modalIngredientsList = document.getElementById(
+    'modal-ingredients-list'
+  );
   const modalBackdrop = document.getElementById('modal-backdrop');
   const modalCancel = document.getElementById('modal-cancel');
   const modalConfirm = document.getElementById('modal-confirm');
@@ -997,7 +1116,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     prepTime?: number;
     cookTime?: number;
     servings?: number;
-    ingredients: Array<{ amount: string; name: string; original?: string; converted?: boolean; confidence?: string }>;
+    ingredients: Array<{
+      amount: string;
+      name: string;
+      original?: string;
+      converted?: boolean;
+      confidence?: string;
+    }>;
     steps: string[];
     imagePath?: string;
     thumbnailPath?: string;
@@ -1027,8 +1152,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   /**
    * Sets a form field value by its ID.
    */
-  function setFieldValue(fieldId: string, value: string | number | undefined): void {
-    const field = document.getElementById(fieldId) as HTMLInputElement | HTMLTextAreaElement | null;
+  function setFieldValue(
+    fieldId: string,
+    value: string | number | undefined
+  ): void {
+    const field = document.getElementById(fieldId) as
+      | HTMLInputElement
+      | HTMLTextAreaElement
+      | null;
     if (field && value !== undefined && value !== null) {
       field.value = String(value);
       // Trigger input event for any listeners (e.g., character counters)
@@ -1058,8 +1189,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
       data.ingredients.forEach((ingredient) => {
         const row = createIngredientRow();
-        const amountInput = row.querySelector('input[name^="ingredient_amount_"]') as HTMLInputElement;
-        const nameInput = row.querySelector('input[name^="ingredient_name_"]') as HTMLInputElement;
+        const amountInput = row.querySelector(
+          'input[name^="ingredient_amount_"]'
+        ) as HTMLInputElement;
+        const nameInput = row.querySelector(
+          'input[name^="ingredient_name_"]'
+        ) as HTMLInputElement;
 
         if (amountInput) amountInput.value = ingredient.amount;
         if (nameInput) nameInput.value = ingredient.name;
@@ -1091,7 +1226,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       }
 
       // Add hidden input for scraped image path
-      let scrapedImageInput = document.getElementById('scraped_image_path') as HTMLInputElement;
+      let scrapedImageInput = document.getElementById(
+        'scraped_image_path'
+      ) as HTMLInputElement;
       if (!scrapedImageInput) {
         scrapedImageInput = document.createElement('input');
         scrapedImageInput.type = 'hidden';
@@ -1108,7 +1245,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
    */
   function hasLowConfidenceIngredients(data: ScrapedRecipeData): boolean {
     return data.ingredients.some(
-      (ing) => ing.converted && (ing.confidence === 'low' || ing.confidence === 'medium')
+      (ing) =>
+        ing.converted &&
+        (ing.confidence === 'low' || ing.confidence === 'medium')
     );
   }
 
@@ -1126,7 +1265,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('stroke-linecap', 'round');
     path.setAttribute('stroke-linejoin', 'round');
-    path.setAttribute('d', 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z');
+    path.setAttribute(
+      'd',
+      'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'
+    );
 
     svg.appendChild(path);
     return svg;
@@ -1135,16 +1277,20 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   /**
    * Creates a single ingredient review row for the modal using safe DOM methods.
    */
-  function createReviewRow(ingredient: ScrapedRecipeData['ingredients'][0]): HTMLElement {
+  function createReviewRow(
+    ingredient: ScrapedRecipeData['ingredients'][0]
+  ): HTMLElement {
     const row = document.createElement('div');
     row.className = 'bg-ctp-base rounded-lg p-3 border border-ctp-surface1';
 
-    const original = ingredient.original || `${ingredient.amount} ${ingredient.name}`;
+    const original =
+      ingredient.original || `${ingredient.amount} ${ingredient.name}`;
     const converted = `${ingredient.amount} ${ingredient.name}`;
 
     // Determine confidence styling
     let confidenceClass = 'text-ctp-green';
-    const showWarning = ingredient.confidence === 'low' || ingredient.confidence === 'medium';
+    const showWarning =
+      ingredient.confidence === 'low' || ingredient.confidence === 'medium';
 
     if (ingredient.confidence === 'low') {
       confidenceClass = 'text-ctp-yellow';
@@ -1244,8 +1390,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     setImportLoading(true);
 
     try {
-      const response = await fetch(`/api/scrape?url=${encodeURIComponent(url)}`);
-      const result = await response.json();
+      const response = await fetch(
+        `/api/scrape?url=${encodeURIComponent(url)}`
+      );
+      let result;
+      try {
+        result = await response.json();
+      } catch {
+        showMessage('Failed to import recipe. Please try again.', 'error');
+        return;
+      }
 
       if (!response.ok) {
         const errorMsg = result.error || 'Failed to import recipe';
@@ -1266,7 +1420,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       }
     } catch (error) {
       console.error('Import error:', error);
-      showMessage('Network error. Please check your connection and try again.', 'error');
+      showMessage(
+        'Network error. Please check your connection and try again.',
+        'error'
+      );
     } finally {
       setImportLoading(false);
     }
@@ -1308,7 +1465,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   // Close modal on escape key
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && ingredientReviewModal && !ingredientReviewModal.classList.contains('hidden')) {
+    if (
+      e.key === 'Escape' &&
+      ingredientReviewModal &&
+      !ingredientReviewModal.classList.contains('hidden')
+    ) {
       closeModal();
     }
   });
