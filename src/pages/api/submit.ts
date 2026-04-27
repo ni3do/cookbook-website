@@ -17,6 +17,7 @@ import {
   getClientIp,
   createRateLimitResponse,
 } from '../../lib/rateLimit';
+import { createRecipePR } from '../../lib/github';
 import sharp from 'sharp';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -176,6 +177,7 @@ export const POST: APIRoute = async ({ request }) => {
   // Process image if provided
   let imagePath: string | undefined;
   let thumbnailPath: string | undefined;
+  let imageBuffer: Buffer | undefined;
 
   // Check for scraped image path first (from URL import)
   const scrapedImagePath = getString(formData, 'scraped_image_path');
@@ -186,6 +188,13 @@ export const POST: APIRoute = async ({ request }) => {
     if (validatedPaths) {
       imagePath = validatedPaths.imagePath;
       thumbnailPath = validatedPaths.thumbnailPath;
+      // Read scraped image into buffer for PR creation
+      const fullPath = path.join(
+        process.cwd(),
+        'public',
+        validatedPaths.imagePath
+      );
+      imageBuffer = fs.readFileSync(fullPath);
     }
     // If validation fails, we'll fall through to normal image processing below
   }
@@ -212,6 +221,7 @@ export const POST: APIRoute = async ({ request }) => {
         const imageResult = await processImage(imageFile);
         imagePath = imageResult.imagePath;
         thumbnailPath = imageResult.thumbnailPath;
+        imageBuffer = imageResult.imageBuffer;
       } catch (error) {
         console.error('Image processing error:', error);
         return jsonResponse({ errors: ['Failed to process image'] }, 500);
@@ -261,6 +271,15 @@ export const POST: APIRoute = async ({ request }) => {
     }
   }
 
+  // Create GitHub PR with recipe markdown + image
+  let prUrl: string | undefined;
+  if (imageBuffer) {
+    const prResult = await createRecipePR(submission, imageBuffer);
+    if (prResult) {
+      prUrl = prResult.prUrl;
+    }
+  }
+
   return jsonResponse(
     {
       message: 'Recipe submitted successfully! We will review it shortly.',
@@ -271,6 +290,7 @@ export const POST: APIRoute = async ({ request }) => {
         stepCount: submission.steps.length,
         hasImage: !!imagePath,
       },
+      ...(prUrl && { prUrl }),
     },
     200
   );
@@ -281,7 +301,7 @@ export const POST: APIRoute = async ({ request }) => {
  */
 async function processImage(
   file: File
-): Promise<{ imagePath: string; thumbnailPath: string }> {
+): Promise<{ imagePath: string; thumbnailPath: string; imageBuffer: Buffer }> {
   const buffer = Buffer.from(await file.arrayBuffer());
   const timestamp = Date.now();
   const slug = `submission-${timestamp}`;
@@ -299,14 +319,16 @@ async function processImage(
   const fullImagePath = path.join(outputDir, imageName);
   const fullThumbPath = path.join(outputDir, thumbnailName);
 
-  // Process and save full-size image (max 1200px wide)
-  await sharp(buffer)
+  // Process full-size image (max 1200px wide) — keep buffer for PR creation
+  const imageBuffer = await sharp(buffer)
     .resize(FULL_IMAGE_WIDTH, null, {
       withoutEnlargement: true,
       fit: 'inside',
     })
     .webp({ quality: 85 })
-    .toFile(fullImagePath);
+    .toBuffer();
+
+  await fs.promises.writeFile(fullImagePath, imageBuffer);
 
   // Generate thumbnail (400px wide)
   await sharp(buffer)
@@ -317,10 +339,11 @@ async function processImage(
     .webp({ quality: 80 })
     .toFile(fullThumbPath);
 
-  // Return paths relative to public directory
+  // Return paths relative to public directory + buffer for GitHub PR
   return {
     imagePath: `/images/submissions/${imageName}`,
     thumbnailPath: `/images/submissions/${thumbnailName}`,
+    imageBuffer,
   };
 }
 
