@@ -23,3 +23,16 @@ node_modules/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Playwright MCP artifacts
+.playwright-mcp/
+
+# Runtime-generated submission images (user uploads / scraped)
+public/images/submissions/
+
+# Local screenshots / scratch artifacts
+import-result.png
+submit-page-filled.png
+submit-page-initial.png
+submit-result.png
+

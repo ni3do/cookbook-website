@@ -1,3 +1,0 @@
-[     773ms] [LOG] Service Worker registered with scope: https://recipes.siwachter.com/ @ https://recipes.siwachter.com/submit:82
-[   91501ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://recipes.siwachter.com/api/submit:0
-[   91502ms] [ERROR] Submission error: SyntaxError: Unexpected token 'C', "Cross-site"... is not valid JSON @ https://recipes.siwachter.com/_astro/submit.astro_astro_type_script_index_0_lang.CpN4Kx-J.js:0

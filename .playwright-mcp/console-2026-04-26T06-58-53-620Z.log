@@ -1,3 +1,0 @@
-[     259ms] [LOG] Service Worker registered with scope: https://recipes.siwachter.com/ @ https://recipes.siwachter.com/submit:85
-[   12492ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://recipes.siwachter.com/images/submissions/scrape-1777186745901-thumb.webp:0
-[   55391ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://recipes.siwachter.com/api/submit:0

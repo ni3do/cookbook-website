@@ -1,3 +1,0 @@
-[    1312ms] [LOG] Service Worker registered with scope: http://localhost:4321/ @ http://localhost:4321/submit:4079
-[   81496ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:4321/api/submit:0
-[  134991ms] [LOG] Service Worker registered with scope: http://localhost:4321/ @ http://localhost:4321/submit:4141

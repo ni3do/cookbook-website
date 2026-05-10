@@ -1,2 +1,0 @@
-[      59ms] [LOG] Service Worker registered with scope: http://localhost:4321/ @ http://localhost:4321/submit:4141
-[   58776ms] [WARNING] The specified value "test123" cannot be parsed, or is out of range. @ :3
