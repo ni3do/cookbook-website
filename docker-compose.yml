@@ -1,0 +1,71 @@
+# cookbook — Dokploy-deployed via Docker Compose.
+#
+# Two services:
+#   cookbook       — Astro SSR site (recipes.siwachter.com)
+#   claude-runner  — sidecar for /api/import (extract + open PR)
+#
+# They share an implicit Compose network (no external `ai-services` needed)
+# and a `uploads` volume so the sidecar can read user-uploaded images
+# directly without going through HTTP.
+#
+# Required env (set in Dokploy UI, or via a local .env for development):
+#   GITHUB_TOKEN        fine-grained PAT scoped to ni3do/cookbook-website
+#                       with contents (R/W) and pull-requests (R/W)
+# Optional:
+#   PUBLIC_BASE_URL     defaults to https://recipes.siwachter.com (used only
+#                       to fetch images for URL imports — not for uploads)
+#   CLAUDE_MODEL        defaults to claude-sonnet-4-6
+#   GITHUB_REPO         defaults to ni3do/cookbook-website
+#   GIT_AUTHOR_NAME / GIT_AUTHOR_EMAIL
+
+services:
+  cookbook:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cookbook
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=4321
+      - CLAUDE_RUNNER_URL=http://claude-runner:8080
+      - PUBLIC_BASE_URL=${PUBLIC_BASE_URL:-https://recipes.siwachter.com}
+      - UPLOAD_DIR=/uploads
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      # Persistent sqlite for ratings/comments
+      - /data/docker-volumes/cookbook/data:/app/data
+      # Shared with the sidecar — uploaded images go here
+      - /data/docker-volumes/cookbook/uploads:/uploads
+    depends_on:
+      claude-runner:
+        condition: service_started
+
+  claude-runner:
+    build:
+      context: ./sidecar/claude-runner
+      dockerfile: Dockerfile
+    container_name: claude-runner
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Zurich
+      - PORT=8080
+      - WORKDIR=/workdir
+      - CLAUDE_MODEL=${CLAUDE_MODEL:-claude-sonnet-4-6}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_REPO=${GITHUB_REPO:-ni3do/cookbook-website}
+      - GIT_AUTHOR_NAME=${GIT_AUTHOR_NAME:-Cookbook Bot}
+      - GIT_AUTHOR_EMAIL=${GIT_AUTHOR_EMAIL:-cookbook-bot@siwachter.com}
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      # Cached clone of cookbook-website (so we don't re-clone on every PR)
+      - /data/docker-volumes/cookbook/sidecar-workdir:/workdir
+      # Subscription OAuth token — survives restarts and rebuilds
+      - /data/docker-volumes/cookbook/sidecar-claude:/home/node/.claude
+      # Shared with cookbook — read uploaded images here
+      - /data/docker-volumes/cookbook/uploads:/uploads:ro

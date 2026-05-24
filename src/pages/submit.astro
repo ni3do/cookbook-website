@@ -108,71 +108,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </div>
       </div>
 
-      <!-- Ingredient Review Modal -->
-      <div id="ingredient-review-modal" class="fixed inset-0 z-50 hidden">
-        <div
-          class="fixed inset-0 bg-ctp-crust/80 backdrop-blur-sm"
-          id="modal-backdrop"
-        >
-        </div>
-        <div class="fixed inset-0 flex items-center justify-center p-4">
-          <div
-            class="bg-ctp-surface0 rounded-2xl border border-ctp-surface1 shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col"
-          >
-            <div class="p-6 border-b border-ctp-surface1">
-              <h3 class="text-xl font-bold text-ctp-text">
-                Review Converted Ingredients
-              </h3>
-              <p class="text-sm text-ctp-subtext1 mt-1">
-                We've converted units to metric. Please review:
-              </p>
-            </div>
-            <div
-              id="modal-ingredients-list"
-              class="flex-1 overflow-y-auto p-6 space-y-3"
-            >
-              <!-- Ingredient review rows will be added dynamically -->
-            </div>
-            <div class="p-6 border-t border-ctp-surface1 bg-ctp-mantle">
-              <div class="flex items-center justify-between">
-                <p class="text-xs text-ctp-overlay0 flex items-center gap-1">
-                  <svg
-                    class="w-4 h-4 text-ctp-yellow"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                    ></path>
-                  </svg>
-                  = low confidence conversion, please verify
-                </p>
-                <div class="flex gap-3">
-                  <button
-                    type="button"
-                    id="modal-cancel"
-                    class="px-4 py-2 text-ctp-subtext1 hover:text-ctp-text hover:bg-ctp-surface1 rounded-lg transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    id="modal-confirm"
-                    class="px-4 py-2 bg-ctp-sapphire hover:bg-ctp-sapphire/90 text-ctp-base font-bold rounded-lg transition-colors"
-                  >
-                    Confirm & Import
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- Basic Info Section -->
       <div class="space-y-6">
         <h2 class="text-xl font-bold text-ctp-text flex items-center gap-2">
@@ -967,20 +902,94 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     return svg;
   }
 
+  // Build a recipe JSON object from the current form state — sent as a
+  // single `recipe` field to /api/import?stage=submit.
+  function collectRecipeFromForm(): Record<string, unknown> {
+    const get = (id: string): string =>
+      (
+        document.getElementById(id) as
+          | HTMLInputElement
+          | HTMLTextAreaElement
+          | null
+      )?.value.trim() ?? '';
+    const num = (id: string): number | null => {
+      const v = get(id);
+      if (!v) return null;
+      const n = parseInt(v, 10);
+      return Number.isFinite(n) ? n : null;
+    };
+
+    const ingredients: Array<{ amount: string; name: string }> = [];
+    document.querySelectorAll('.ingredient-row').forEach((row) => {
+      const amount =
+        (
+          row.querySelector(
+            'input[name^="ingredient_amount_"]'
+          ) as HTMLInputElement | null
+        )?.value.trim() ?? '';
+      const name =
+        (
+          row.querySelector(
+            'input[name^="ingredient_name_"]'
+          ) as HTMLInputElement | null
+        )?.value.trim() ?? '';
+      if (name) ingredients.push({ amount, name });
+    });
+
+    const steps: string[] = [];
+    document.querySelectorAll('.step-row textarea').forEach((ta) => {
+      const v = (ta as HTMLTextAreaElement).value.trim();
+      if (v) steps.push(v);
+    });
+
+    const tagsInput = document.getElementById(
+      'selected_tags'
+    ) as HTMLInputElement | null;
+    const tags = tagsInput?.value
+      ? tagsInput.value
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : [];
+
+    const sourceName = get('source_name');
+    const sourceUrl = get('source_url');
+
+    const scrapedImageUrlInput = document.getElementById(
+      'scraped_image_url'
+    ) as HTMLInputElement | null;
+
+    return {
+      title: get('title'),
+      description: get('description'),
+      prep_time: num('prep_time'),
+      cook_time: num('cook_time'),
+      servings: num('servings'),
+      ingredients,
+      steps,
+      tags,
+      source_name: sourceName || null,
+      source_url: sourceUrl || null,
+      notes: get('notes') || null,
+      image_url: scrapedImageUrlInput?.value.trim() || null,
+    };
+  }
+
   if (form) {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      // Validate image is provided
+      // An image is required: either an uploaded file or an image URL
+      // carried over from the preview stage.
       const imageInput = document.getElementById(
         'image'
       ) as HTMLInputElement | null;
       const hasUploadedImage = imageInput?.files && imageInput.files.length > 0;
-      const scrapedImageInput = document.getElementById(
-        'scraped_image_path'
+      const scrapedImageUrlInput = document.getElementById(
+        'scraped_image_url'
       ) as HTMLInputElement | null;
       const hasScrapedImage =
-        scrapedImageInput?.value && scrapedImageInput.value.trim() !== '';
+        scrapedImageUrlInput?.value && scrapedImageUrlInput.value.trim() !== '';
       if (!hasUploadedImage && !hasScrapedImage) {
         showMessage(
           'A recipe photo is required. Please upload an image.',
@@ -989,7 +998,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         return;
       }
 
-      // Show loading state
       if (submitButton) {
         submitButton.disabled = true;
         submitButton.textContent = '';
@@ -998,9 +1006,31 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       }
 
       try {
-        const formData = new FormData(form);
+        const formData = new FormData();
+        formData.append('recipe', JSON.stringify(collectRecipeFromForm()));
+        formData.append(
+          'author_name',
+          (document.getElementById('author_name') as HTMLInputElement).value
+        );
+        formData.append(
+          'captcha',
+          (document.getElementById('captcha') as HTMLInputElement).value
+        );
+        formData.append(
+          'captcha_answer',
+          (document.getElementById('captcha_answer') as HTMLInputElement).value
+        );
+        const honeypot = (
+          form.querySelector('input[name="website"]') as HTMLInputElement | null
+        )?.value;
+        if (honeypot) formData.append('website', honeypot);
+        if (hasUploadedImage && imageInput?.files?.[0]) {
+          formData.append('image', imageInput.files[0]);
+        } else if (scrapedImageUrlInput?.value) {
+          formData.append('image_url', scrapedImageUrlInput.value);
+        }
 
-        const response = await fetch('/api/submit', {
+        const response = await fetch('/api/import?stage=submit', {
           method: 'POST',
           body: formData,
         });
@@ -1016,16 +1046,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
         if (!response.ok) {
           const errorMessages =
-            result.errors?.join(', ') || result.error || 'Submission failed';
+            result.errors?.join(', ') ||
+            result.error ||
+            result.detail ||
+            'Submission failed';
           showMessage(errorMessages, 'error');
-
-          // Regenerate CAPTCHA on error
           generateCaptcha();
         } else {
-          showMessage(
-            result.message || 'Recipe submitted successfully!',
-            'success'
-          );
+          const successMsg = result.prUrl
+            ? `Recipe submitted! PR opened: ${result.prUrl}`
+            : result.message || 'Recipe submitted successfully!';
+          showMessage(successMsg, 'success');
           form.reset();
 
           // Reset image preview
@@ -1095,49 +1126,24 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   const importSpinner = document.getElementById('import-spinner');
   const importBtnText = document.getElementById('import-btn-text');
 
-  // Modal elements
-  const ingredientReviewModal = document.getElementById(
-    'ingredient-review-modal'
-  );
-  const modalIngredientsList = document.getElementById(
-    'modal-ingredients-list'
-  );
-  const modalBackdrop = document.getElementById('modal-backdrop');
-  const modalCancel = document.getElementById('modal-cancel');
-  const modalConfirm = document.getElementById('modal-confirm');
-
-  // Stored scraped data for use after modal confirmation
-  let pendingScrapedData: ScrapedRecipeData | null = null;
-
-  /** Shape of scraped recipe data from the API */
-  interface ScrapedRecipeData {
+  /** Shape of recipe data returned by /api/import?stage=preview */
+  interface ImportedRecipe {
     title: string;
-    description?: string;
-    prepTime?: number;
-    cookTime?: number;
-    servings?: number;
-    ingredients: Array<{
-      amount: string;
-      name: string;
-      original?: string;
-      converted?: boolean;
-      confidence?: string;
-    }>;
+    description?: string | null;
+    prep_time?: number | null;
+    cook_time?: number | null;
+    servings?: number | null;
+    ingredients: Array<{ amount: string; name: string }>;
     steps: string[];
-    imagePath?: string;
-    thumbnailPath?: string;
-    sourceName?: string;
-    sourceUrl: string;
+    tags?: string[];
+    source_name?: string | null;
+    source_url?: string | null;
+    image_url?: string | null;
   }
 
-  /**
-   * Toggles the import button loading state.
-   */
   function setImportLoading(loading: boolean): void {
     if (!importBtn || !importIcon || !importSpinner || !importBtnText) return;
-
     importBtn.disabled = loading;
-
     if (loading) {
       importIcon.classList.add('hidden');
       importSpinner.classList.remove('hidden');
@@ -1149,237 +1155,103 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
   }
 
-  /**
-   * Sets a form field value by its ID.
-   */
   function setFieldValue(
     fieldId: string,
-    value: string | number | undefined
+    value: string | number | null | undefined
   ): void {
     const field = document.getElementById(fieldId) as
       | HTMLInputElement
       | HTMLTextAreaElement
       | null;
-    if (field && value !== undefined && value !== null) {
+    if (field && value !== undefined && value !== null && value !== '') {
       field.value = String(value);
-      // Trigger input event for any listeners (e.g., character counters)
       field.dispatchEvent(new Event('input', { bubbles: true }));
     }
   }
 
-  /**
-   * Populates the form with scraped recipe data.
-   */
-  function populateForm(data: ScrapedRecipeData): void {
-    // Basic fields
+  /** Sync the visible tag pills with the imported tag list. */
+  function applyImportedTags(tags: string[] | undefined): void {
+    if (!tags || !selectedTagsInput) return;
+    selectedTags.clear();
+    for (const t of tags) {
+      const tag = t.trim().toLowerCase();
+      if (AVAILABLE_TAGS.includes(tag)) selectedTags.add(tag);
+    }
+    document.querySelectorAll('.tag-pill').forEach((pill) => {
+      const el = pill as HTMLElement;
+      const tag = el.dataset.tag;
+      updatePillStyle(el, !!(tag && selectedTags.has(tag)));
+    });
+    selectedTagsInput.value = Array.from(selectedTags).join(',');
+  }
+
+  /** Fill the form from an imported recipe (Claude's preview output). */
+  function populateForm(data: ImportedRecipe): void {
     setFieldValue('title', data.title);
-    setFieldValue('description', data.description);
-    setFieldValue('prep_time', data.prepTime);
-    setFieldValue('cook_time', data.cookTime);
-    setFieldValue('servings', data.servings);
+    setFieldValue('description', data.description ?? '');
+    setFieldValue('prep_time', data.prep_time ?? '');
+    setFieldValue('cook_time', data.cook_time ?? '');
+    setFieldValue('servings', data.servings ?? '');
+    setFieldValue('source_name', data.source_name ?? '');
+    setFieldValue('source_url', data.source_url ?? '');
 
-    // Source attribution
-    setFieldValue('source_name', data.sourceName);
-    setFieldValue('source_url', data.sourceUrl);
-
-    // Populate ingredients
-    if (ingredientsContainer && data.ingredients.length > 0) {
+    if (ingredientsContainer && data.ingredients?.length) {
       ingredientsContainer.textContent = '';
       ingredientIndex = 0;
-
-      data.ingredients.forEach((ingredient) => {
+      for (const ing of data.ingredients) {
         const row = createIngredientRow();
-        const amountInput = row.querySelector(
+        const amount = row.querySelector(
           'input[name^="ingredient_amount_"]'
-        ) as HTMLInputElement;
-        const nameInput = row.querySelector(
+        ) as HTMLInputElement | null;
+        const name = row.querySelector(
           'input[name^="ingredient_name_"]'
-        ) as HTMLInputElement;
-
-        if (amountInput) amountInput.value = ingredient.amount;
-        if (nameInput) nameInput.value = ingredient.name;
-
+        ) as HTMLInputElement | null;
+        if (amount) amount.value = ing.amount ?? '';
+        if (name) name.value = ing.name ?? '';
         ingredientsContainer.appendChild(row);
-      });
+      }
     }
 
-    // Populate steps
-    if (stepsContainer && data.steps.length > 0) {
+    if (stepsContainer && data.steps?.length) {
       stepsContainer.textContent = '';
       stepIndex = 0;
-
-      data.steps.forEach((stepText) => {
+      for (const step of data.steps) {
         const row = createStepRow();
-        const textarea = row.querySelector('textarea') as HTMLTextAreaElement;
-        if (textarea) textarea.value = stepText;
+        const ta = row.querySelector('textarea') as HTMLTextAreaElement | null;
+        if (ta) ta.value = step;
         stepsContainer.appendChild(row);
-      });
+      }
     }
 
-    // Handle image from scraping
-    if (data.imagePath && data.thumbnailPath) {
-      // Show preview using thumbnail
+    applyImportedTags(data.tags);
+
+    if (data.image_url) {
       if (previewImg && uploadPlaceholder && imagePreview) {
-        previewImg.src = data.thumbnailPath;
+        previewImg.src = data.image_url;
         uploadPlaceholder.classList.add('hidden');
         imagePreview.classList.remove('hidden');
       }
-
-      // Add hidden input for scraped image path
-      let scrapedImageInput = document.getElementById(
-        'scraped_image_path'
-      ) as HTMLInputElement;
-      if (!scrapedImageInput) {
-        scrapedImageInput = document.createElement('input');
-        scrapedImageInput.type = 'hidden';
-        scrapedImageInput.id = 'scraped_image_path';
-        scrapedImageInput.name = 'scraped_image_path';
-        form?.appendChild(scrapedImageInput);
+      let urlInput = document.getElementById(
+        'scraped_image_url'
+      ) as HTMLInputElement | null;
+      if (!urlInput) {
+        urlInput = document.createElement('input');
+        urlInput.type = 'hidden';
+        urlInput.id = 'scraped_image_url';
+        urlInput.name = 'scraped_image_url';
+        form?.appendChild(urlInput);
       }
-      scrapedImageInput.value = data.imagePath;
+      urlInput.value = data.image_url;
     }
   }
 
-  /**
-   * Checks if any ingredients have low confidence conversions.
-   */
-  function hasLowConfidenceIngredients(data: ScrapedRecipeData): boolean {
-    return data.ingredients.some(
-      (ing) =>
-        ing.converted &&
-        (ing.confidence === 'low' || ing.confidence === 'medium')
-    );
-  }
-
-  /**
-   * Creates a warning icon SVG element.
-   */
-  function createWarningIcon(): SVGSVGElement {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('class', 'w-4 h-4 inline-block flex-shrink-0');
-    svg.setAttribute('fill', 'none');
-    svg.setAttribute('viewBox', '0 0 24 24');
-    svg.setAttribute('stroke', 'currentColor');
-    svg.setAttribute('stroke-width', '2');
-
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('stroke-linecap', 'round');
-    path.setAttribute('stroke-linejoin', 'round');
-    path.setAttribute(
-      'd',
-      'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'
-    );
-
-    svg.appendChild(path);
-    return svg;
-  }
-
-  /**
-   * Creates a single ingredient review row for the modal using safe DOM methods.
-   */
-  function createReviewRow(
-    ingredient: ScrapedRecipeData['ingredients'][0]
-  ): HTMLElement {
-    const row = document.createElement('div');
-    row.className = 'bg-ctp-base rounded-lg p-3 border border-ctp-surface1';
-
-    const original =
-      ingredient.original || `${ingredient.amount} ${ingredient.name}`;
-    const converted = `${ingredient.amount} ${ingredient.name}`;
-
-    // Determine confidence styling
-    let confidenceClass = 'text-ctp-green';
-    const showWarning =
-      ingredient.confidence === 'low' || ingredient.confidence === 'medium';
-
-    if (ingredient.confidence === 'low') {
-      confidenceClass = 'text-ctp-yellow';
-    } else if (ingredient.confidence === 'medium') {
-      confidenceClass = 'text-ctp-peach';
-    }
-
-    if (ingredient.converted) {
-      const wrapper = document.createElement('div');
-      wrapper.className = 'flex items-center justify-between gap-4';
-
-      const content = document.createElement('div');
-      content.className = 'flex-1';
-
-      const originalText = document.createElement('p');
-      originalText.className = 'text-sm text-ctp-overlay0 line-through';
-      originalText.textContent = original;
-
-      const convertedWrapper = document.createElement('p');
-      convertedWrapper.className = `text-sm ${confidenceClass} font-medium flex items-center gap-1`;
-
-      if (showWarning) {
-        convertedWrapper.appendChild(createWarningIcon());
-      }
-
-      const convertedText = document.createTextNode(converted);
-      convertedWrapper.appendChild(convertedText);
-
-      content.appendChild(originalText);
-      content.appendChild(convertedWrapper);
-      wrapper.appendChild(content);
-      row.appendChild(wrapper);
-    } else {
-      const text = document.createElement('div');
-      text.className = 'text-sm text-ctp-text';
-      text.textContent = original;
-      row.appendChild(text);
-    }
-
-    return row;
-  }
-
-  /**
-   * Shows the ingredient review modal.
-   */
-  function showIngredientReviewModal(data: ScrapedRecipeData): void {
-    if (!ingredientReviewModal || !modalIngredientsList) return;
-
-    // Store data for later use
-    pendingScrapedData = data;
-
-    // Clear existing rows using safe method
-    modalIngredientsList.textContent = '';
-
-    // Add ingredient rows
-    data.ingredients.forEach((ingredient) => {
-      modalIngredientsList.appendChild(createReviewRow(ingredient));
-    });
-
-    // Show modal
-    ingredientReviewModal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-  }
-
-  /**
-   * Closes the ingredient review modal.
-   */
-  function closeModal(): void {
-    if (!ingredientReviewModal) return;
-
-    ingredientReviewModal.classList.add('hidden');
-    document.body.style.overflow = '';
-    pendingScrapedData = null;
-  }
-
-  /**
-   * Handles the import button click - fetches and processes recipe data.
-   */
   async function handleImport(): Promise<void> {
     if (!importUrlInput) return;
-
     const url = importUrlInput.value.trim();
-
     if (!url) {
       showMessage('Please enter a URL to import from', 'error');
       return;
     }
-
-    // Basic URL validation
     try {
       new URL(url);
     } catch {
@@ -1388,12 +1260,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
 
     setImportLoading(true);
-
     try {
-      const response = await fetch(
-        `/api/scrape?url=${encodeURIComponent(url)}`
-      );
-      let result;
+      const response = await fetch('/api/import?stage=preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      });
+      let result: Record<string, unknown>;
       try {
         result = await response.json();
       } catch {
@@ -1402,22 +1275,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       }
 
       if (!response.ok) {
-        const errorMsg = result.error || 'Failed to import recipe';
-        showMessage(errorMsg, 'error');
+        const msg =
+          (result.detail as string | undefined) ||
+          (result.error as string | undefined) ||
+          'Failed to import recipe';
+        showMessage(msg, 'error');
         return;
       }
 
-      const data = result as ScrapedRecipeData;
-
-      // Check if we need to show review modal for low confidence conversions
-      if (hasLowConfidenceIngredients(data)) {
-        showIngredientReviewModal(data);
-      } else {
-        // No review needed - populate directly
-        populateForm(data);
-        showMessage('Recipe imported successfully!', 'success');
-        importUrlInput.value = '';
-      }
+      populateForm(result as unknown as ImportedRecipe);
+      showMessage('Recipe imported. Review and submit when ready.', 'success');
+      importUrlInput.value = '';
     } catch (error) {
       console.error('Import error:', error);
       showMessage(
@@ -1429,11 +1297,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
   }
 
-  // Event handlers for import functionality
-  if (importBtn) {
-    importBtn.addEventListener('click', handleImport);
-  }
-
+  if (importBtn) importBtn.addEventListener('click', handleImport);
   if (importUrlInput) {
     importUrlInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
@@ -1442,37 +1306,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       }
     });
   }
-
-  // Modal event handlers
-  if (modalBackdrop) {
-    modalBackdrop.addEventListener('click', closeModal);
-  }
-
-  if (modalCancel) {
-    modalCancel.addEventListener('click', closeModal);
-  }
-
-  if (modalConfirm) {
-    modalConfirm.addEventListener('click', () => {
-      if (pendingScrapedData) {
-        populateForm(pendingScrapedData);
-        showMessage('Recipe imported successfully!', 'success');
-        if (importUrlInput) importUrlInput.value = '';
-      }
-      closeModal();
-    });
-  }
-
-  // Close modal on escape key
-  document.addEventListener('keydown', (e) => {
-    if (
-      e.key === 'Escape' &&
-      ingredientReviewModal &&
-      !ingredientReviewModal.classList.contains('hidden')
-    ) {
-      closeModal();
-    }
-  });
 
   // Message display helper
   function showMessage(message: string, type: 'success' | 'error') {
