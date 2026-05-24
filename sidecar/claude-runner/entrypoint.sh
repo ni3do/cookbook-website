@@ -34,8 +34,14 @@ fi
 gosu node git -C "${CLONE_DIR}" config user.name "${GIT_AUTHOR_NAME:-Cookbook Bot}"
 gosu node git -C "${CLONE_DIR}" config user.email "${GIT_AUTHOR_EMAIL:-cookbook-bot@siwachter.com}"
 
-# gh CLI auth (so `gh pr create` works without a browser)
-echo "${GITHUB_TOKEN}" | gosu node gh auth login --with-token
+# gh CLI auth (so `gh pr create` works without a browser).
+# gh already picks up GITHUB_TOKEN from the env automatically; running an
+# explicit `gh auth login --with-token` while that var is set makes gh exit
+# non-zero, which (under `set -e`) would kill the container before the server
+# starts. Only do the explicit login as a fallback when the env var is absent.
+if [ -z "${GITHUB_TOKEN}" ]; then
+  echo "${GITHUB_TOKEN}" | gosu node gh auth login --with-token
+fi
 
 # Warn loudly if subscription auth hasn't been set up yet — we still start
 # the server so the operator can `docker exec` in to log in.
