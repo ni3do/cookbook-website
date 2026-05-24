@@ -54,6 +54,12 @@ services:
       - TZ=Europe/Zurich
       - PORT=8080
       - WORKDIR=/workdir
+      # Keep Claude's config dir inside the mounted volume. Without this,
+      # ~/.claude.json lives in $HOME (outside the /home/node/.claude mount)
+      # and is lost on every redeploy — the first /extract or /publish after a
+      # deploy then fails with "configuration file not found". Pointing the
+      # config dir at the volume persists both .claude.json and .credentials.json.
+      - CLAUDE_CONFIG_DIR=/home/node/.claude
       - CLAUDE_MODEL=${CLAUDE_MODEL:-claude-sonnet-4-6}
       - GITHUB_TOKEN=${GITHUB_TOKEN}
       - GITHUB_REPO=${GITHUB_REPO:-ni3do/cookbook-website}
