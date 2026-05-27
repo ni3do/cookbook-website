@@ -1,6 +1,6 @@
 ---
 title: 'Lemon Pasta'
-image: 'lemon-pasta.jpg'
+image: 'lemon-pasta.webp'
 author: 'Simon'
 prep_time: 10
 cook_time: 15

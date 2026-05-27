@@ -1,6 +1,6 @@
 ---
 title: 'Beurre Blanc'
-image: 'beurre-blanc.jpg'
+image: 'beurre-blanc.webp'
 author: 'Simon'
 prep_time: 20
 cook_time: 30

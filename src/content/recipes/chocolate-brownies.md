@@ -1,6 +1,6 @@
 ---
 title: 'Fudgy Chocolate Brownies'
-image: 'chocolate-brownies.jpg'
+image: 'chocolate-brownies.webp'
 author: 'Simon'
 prep_time: 15
 cook_time: 25

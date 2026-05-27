@@ -1,6 +1,6 @@
 ---
 title: 'Greek Chicken Gyros with Tzatziki'
-image: 'chicken-gyros.jpg'
+image: 'chicken-gyros.webp'
 author: 'Simon'
 prep_time: 20
 cook_time: 6

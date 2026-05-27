@@ -1,6 +1,6 @@
 ---
 title: 'Zeppole / Cream Puffs'
-image: 'zeppole.jpg'
+image: 'zeppole.webp'
 author: 'Simon'
 prep_time: 60
 cook_time: 30
