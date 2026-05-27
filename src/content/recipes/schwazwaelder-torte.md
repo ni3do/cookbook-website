@@ -1,6 +1,6 @@
 ---
 title: 'Black Forest Cake (Schwarzwälder Kirschtorte)'
-image: 'schwazwaelder-torte.jpg'
+image: 'schwazwaelder-torte.webp'
 author: 'Simon'
 prep_time: 60
 cook_time: 20

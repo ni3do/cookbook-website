@@ -1,6 +1,6 @@
 ---
 title: 'Quick Chicken Stir Fry'
-image: 'chicken-stir-fry.jpg'
+image: 'chicken-stir-fry.webp'
 author: 'Simon'
 prep_time: 15
 cook_time: 10

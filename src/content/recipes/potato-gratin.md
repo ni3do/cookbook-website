@@ -1,6 +1,6 @@
 ---
 title: 'Potato Gratin'
-image: 'potato-gratin.jpg'
+image: 'potato-gratin.webp'
 author: 'Simon'
 prep_time: 15
 cook_time: 90

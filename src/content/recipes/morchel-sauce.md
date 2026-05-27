@@ -1,6 +1,6 @@
 ---
 title: 'Morchel Sauce'
-image: 'morchel-sauce.jpg'
+image: 'morchel-sauce.webp'
 author: 'Simon'
 prep_time: 15
 cook_time: 5
@@ -10,8 +10,6 @@ source:
   name: 'Bettybossi'
   url: 'https://www.bettybossi.ch/de/rezepte/rezept/morchelsauce-10000406/?srsltid=AfmBOoqqvQVNudr6r7BLtmOQq6ir2VjDWB0aGq2ON6BgYEHNBWO37KVs'
 ---
-
-![]()
 
 ## Ingredients
 

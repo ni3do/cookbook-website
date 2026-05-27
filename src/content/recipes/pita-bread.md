@@ -1,6 +1,6 @@
 ---
 title: 'Pita Bread'
-image: 'pita-bread.jpg'
+image: 'pita-bread.webp'
 author: 'Simon'
 prep_time: 20
 cook_time: 10

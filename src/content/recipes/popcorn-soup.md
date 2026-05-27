@@ -1,6 +1,6 @@
 ---
 title: 'Popcorn Soup'
-image: 'popcorn-soup.jpg'
+image: 'popcorn-soup.webp'
 author: 'Simon'
 prep_time: 15
 cook_time: 15

@@ -1,6 +1,6 @@
 ---
 title: 'Potato Puree'
-image: 'potato-puree.jpg'
+image: 'potato-puree.webp'
 author: 'Simon'
 prep_time: 30
 cook_time: 45

@@ -1,6 +1,6 @@
 ---
 title: 'Classic Tomato Soup'
-image: 'tomato-soup.jpg'
+image: 'tomato-soup.webp'
 author: 'Simon'
 prep_time: 15
 cook_time: 30
