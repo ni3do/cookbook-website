@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Spicy tofu and chicken udon</title>
+  <desc id="desc">Illustrated bowl of udon noodles with tofu sauce, chicken, cucumber, herbs, and sesame.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f5e0dc"/>
+      <stop offset="0.55" stop-color="#f2cdcd"/>
+      <stop offset="1" stop-color="#fab387"/>
+    </linearGradient>
+    <radialGradient id="bowl" cx="50%" cy="36%" r="58%">
+      <stop offset="0" stop-color="#f9e2af"/>
+      <stop offset="0.55" stop-color="#eba0ac"/>
+      <stop offset="1" stop-color="#cba6f7"/>
+    </radialGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="22" stdDeviation="18" flood-color="#11111b" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  <circle cx="1020" cy="120" r="170" fill="#f9e2af" opacity="0.28"/>
+  <circle cx="150" cy="690" r="220" fill="#b4befe" opacity="0.22"/>
+
+  <g filter="url(#shadow)">
+    <ellipse cx="600" cy="485" rx="455" ry="245" fill="#313244"/>
+    <ellipse cx="600" cy="445" rx="425" ry="220" fill="url(#bowl)"/>
+    <ellipse cx="600" cy="415" rx="355" ry="165" fill="#f5c2e7" opacity="0.92"/>
+
+    <g fill="none" stroke="#f9e2af" stroke-width="24" stroke-linecap="round" opacity="0.96">
+      <path d="M310 405c105-75 245 70 360-5s205-26 265 42"/>
+      <path d="M345 470c95-72 205 54 315-8 112-64 218-17 280 30"/>
+      <path d="M405 350c75-44 151 38 242 5 112-41 185-8 245 29"/>
+      <path d="M385 535c108-56 204 24 300-18 83-37 156-24 226 21"/>
+    </g>
+
+    <path d="M465 335c85-55 210-52 282-5 56 37 49 95-11 128-78 43-208 41-280-3-62-38-56-78 9-120z" fill="#f38ba8" opacity="0.9"/>
+    <g fill="#a6e3a1">
+      <rect x="725" y="315" width="22" height="150" rx="11" transform="rotate(58 736 390)"/>
+      <rect x="760" y="345" width="18" height="140" rx="9" transform="rotate(64 769 415)"/>
+      <rect x="785" y="380" width="18" height="130" rx="9" transform="rotate(72 794 445)"/>
+    </g>
+    <g fill="#94e2d5">
+      <rect x="755" y="470" width="170" height="18" rx="9" transform="rotate(-18 840 479)"/>
+      <rect x="770" y="505" width="155" height="18" rx="9" transform="rotate(-8 847 514)"/>
+      <rect x="742" y="535" width="150" height="18" rx="9" transform="rotate(10 817 544)"/>
+    </g>
+    <g fill="#d20f39" opacity="0.85">
+      <circle cx="415" cy="430" r="10"/>
+      <circle cx="485" cy="515" r="8"/>
+      <circle cx="650" cy="360" r="9"/>
+      <circle cx="710" cy="500" r="7"/>
+      <circle cx="570" cy="455" r="8"/>
+    </g>
+    <g fill="#f9e2af">
+      <circle cx="360" cy="375" r="7"/>
+      <circle cx="820" cy="430" r="6"/>
+      <circle cx="620" cy="545" r="7"/>
+      <circle cx="525" cy="330" r="6"/>
+      <circle cx="710" cy="405" r="6"/>
+      <circle cx="450" cy="570" r="6"/>
+    </g>
+  </g>
+</svg>
