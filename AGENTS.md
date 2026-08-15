@@ -82,4 +82,6 @@ needs it. To exercise the full flow locally, `cp .env.example .env`, fill in
 
 ## Common Issues
 
-<!-- Document issues encountered and their solutions -->
+### Import sidecar exits before Claude receives its request
+
+If `POST /api/import?stage=preview` returns a 502 whose detail says `claude exited 1` and `no stdin data received in 3s`, the deployed `claude-runner` is failing before extraction rather than rejecting the recipe URL. The cookbook content can still be added manually as a short-term recovery, but the sidecar invocation needs its stdin handling fixed before relying on URL imports again.
