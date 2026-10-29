@@ -1,6 +1,6 @@
 ---
 title: 'Sriracha Peanut Chicken Rice Bowls'
-image: 'sriracha-peanut-chicken-rice-bowls.svg'
+image: 'sriracha-peanut-chicken-rice-bowls.webp'
 author: 'Jonas'
 prep_time: 20
 cook_time: 30
