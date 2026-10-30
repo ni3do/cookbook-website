@@ -8,6 +8,7 @@ import Comments from '../../components/Comments.astro';
 import RecipeSchema from '../../components/RecipeSchema.astro';
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { getRatingStats } from '../../lib/ratings';
+import { renderInlineMarkdown } from '../../utils/inlineMarkdown';
 
 // Prerender all recipe pages at build time
 export const prerender = true;
@@ -399,7 +400,10 @@ const aggregateRating =
             {
               allIngredients.length > 0 && (
                 <div class="mt-6 pt-4 border-t border-ctp-surface1">
-                  <AddToShoppingListButton slug={slug} ingredients={allIngredients} />
+                  <AddToShoppingListButton
+                    slug={slug}
+                    ingredients={allIngredients}
+                  />
                 </div>
               )
             }
@@ -437,7 +441,10 @@ const aggregateRating =
                     {index + 1}
                   </div>
                   <div class="flex-1 pt-1">
-                    <p class="text-ctp-text leading-relaxed">{step}</p>
+                    <p
+                      class="text-ctp-text leading-relaxed"
+                      set:html={renderInlineMarkdown(step)}
+                    />
                   </div>
                 </li>
               ))

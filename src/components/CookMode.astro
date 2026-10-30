@@ -1,4 +1,6 @@
 ---
+import { renderInlineMarkdown } from '../utils/inlineMarkdown';
+
 interface Props {
   steps: string[];
   slug: string;
@@ -58,9 +60,10 @@ const { steps, slug } = Astro.props;
         {
           steps.map((step, index) => (
             <div class="step-item hidden" data-step={index}>
-              <p class="text-2xl md:text-3xl lg:text-4xl leading-relaxed text-ctp-text font-medium">
-                {step}
-              </p>
+              <p
+                class="text-2xl md:text-3xl lg:text-4xl leading-relaxed text-ctp-text font-medium"
+                set:html={renderInlineMarkdown(step)}
+              />
             </div>
           ))
         }
