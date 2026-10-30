@@ -2,7 +2,6 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import RecipeCard from '../components/RecipeCard.astro';
 import { getCollection } from 'astro:content';
-import { RECIPE_TAGS } from '../content/config';
 
 // Fetch all recipes
 const recipes = await getCollection('recipes');
@@ -14,10 +13,23 @@ recipes.forEach((recipe) => {
     tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
   });
 });
-const popularTags = [...tagCounts.entries()]
-  .sort((a, b) => b[1] - a[1])
-  .slice(0, 12)
-  .map(([tag]) => tag);
+// All tags used by at least one recipe, most used first
+const sortedTags = [...tagCounts.entries()].sort(
+  (a, b) => b[1] - a[1] || a[0].localeCompare(b[0])
+);
+const POPULAR_COUNT = 12;
+const popularTags = sortedTags.slice(0, POPULAR_COUNT);
+const moreTags = sortedTags.slice(POPULAR_COUNT);
+
+// Authors present in the content
+const authorCounts = new Map<string, number>();
+recipes.forEach((recipe) => {
+  const author = recipe.data.author;
+  authorCounts.set(author, (authorCounts.get(author) || 0) + 1);
+});
+const authors = [...authorCounts.entries()].sort((a, b) =>
+  a[0].localeCompare(b[0])
+);
 
 // Extract ingredient names from recipe body for search
 function extractIngredients(body: string): string {
@@ -100,33 +112,88 @@ function extractIngredients(body: string): string {
         </div>
       </div>
 
-      {/* Tag Filter Pills */}
-      <div class="flex flex-wrap justify-center gap-2" id="tag-filters">
-        <button
-          type="button"
-          data-tag="all"
-          class="tag-pill active px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-ctp-mauve text-ctp-base"
-        >
-          All Recipes
-        </button>
+      {/* Filters: author + multi-tag (AND) */}
+      <div id="recipe-filters" class="space-y-4">
         {
-          popularTags.map((tag) => (
-            <button
-              type="button"
-              data-tag={tag}
-              class="tag-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-ctp-surface0 text-ctp-subtext1 hover:bg-ctp-surface1 border border-ctp-surface1"
+          authors.length > 1 && (
+            <div
+              class="flex flex-wrap justify-center items-center gap-2"
+              role="group"
+              aria-label="Filter by author"
             >
-              {tag.replace(/-/g, ' ')}
-            </button>
-          ))
+              <span class="text-sm text-ctp-subtext0 mr-1">By:</span>
+              {authors.map(([author, count]) => (
+                <button
+                  type="button"
+                  data-author={author}
+                  aria-pressed="false"
+                  class="author-pill px-3 py-1.5 rounded-full text-sm font-medium transition-all bg-ctp-surface0 text-ctp-subtext1 hover:bg-ctp-surface1 border border-ctp-surface1"
+                >
+                  {author} <span class="opacity-70">({count})</span>
+                </button>
+              ))}
+            </div>
+          )
         }
+
+        <div
+          class="flex flex-wrap justify-center gap-2"
+          id="tag-filters"
+          role="group"
+          aria-label="Filter by tags (select multiple)"
+        >
+          {
+            popularTags.map(([tag, count]) => (
+              <button
+                type="button"
+                data-tag={tag}
+                aria-pressed="false"
+                class="tag-pill px-3 py-1.5 rounded-full text-sm font-medium transition-all bg-ctp-surface0 text-ctp-subtext1 hover:bg-ctp-surface1 border border-ctp-surface1"
+              >
+                {tag.replace(/-/g, ' ')}{' '}
+                <span class="opacity-70">({count})</span>
+              </button>
+            ))
+          }
+        </div>
+
+        {
+          moreTags.length > 0 && (
+            <details id="more-tags" class="group">
+              <summary class="cursor-pointer list-none text-sm text-ctp-mauve hover:underline select-none">
+                <span class="group-open:hidden">
+                  Show all tags (+{moreTags.length})
+                </span>
+                <span class="hidden group-open:inline">Show fewer tags</span>
+              </summary>
+              <div class="flex flex-wrap justify-center gap-2 mt-3">
+                {moreTags.map(([tag, count]) => (
+                  <button
+                    type="button"
+                    data-tag={tag}
+                    aria-pressed="false"
+                    class="tag-pill px-3 py-1.5 rounded-full text-sm font-medium transition-all bg-ctp-surface0 text-ctp-subtext1 hover:bg-ctp-surface1 border border-ctp-surface1"
+                  >
+                    {tag.replace(/-/g, ' ')}{' '}
+                    <span class="opacity-70">({count})</span>
+                  </button>
+                ))}
+              </div>
+            </details>
+          )
+        }
+
+        <p class="text-xs text-ctp-overlay1">
+          Tip: select several tags to narrow results — recipes must match all of
+          them.
+        </p>
       </div>
     </div>
   </section>
 
   {/* Recipe Grid */}
   <section class="max-w-6xl mx-auto px-4 py-12">
-    <div class="flex items-center justify-between mb-8">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-8">
       <h2 class="text-2xl font-bold text-ctp-text">
         <span id="grid-title">All Recipes</span>
         <span
@@ -136,6 +203,13 @@ function extractIngredients(body: string): string {
           ({recipes.length})
         </span>
       </h2>
+      <button
+        type="button"
+        id="clear-filters"
+        class="hidden px-4 py-1.5 rounded-full text-sm font-medium bg-ctp-surface0 text-ctp-red border border-ctp-surface1 hover:bg-ctp-surface1 transition-all"
+      >
+        Clear filters
+      </button>
     </div>
 
     {/* Recipe Grid */}
@@ -149,6 +223,7 @@ function extractIngredients(body: string): string {
             class="recipe-item"
             data-title={recipe.data.title.toLowerCase()}
             data-tags={recipe.data.tags.join(',')}
+            data-author={recipe.data.author}
             data-ingredients={extractIngredients(recipe.body)}
           >
             <RecipeCard recipe={recipe} priority={index < 6} />
@@ -180,115 +255,152 @@ function extractIngredients(body: string): string {
 </BaseLayout>
 
 <style>
-  .tag-pill.active {
+  .tag-pill.active,
+  .author-pill.active {
     @apply bg-ctp-mauve text-ctp-base border-ctp-mauve;
   }
 </style>
 
 <script>
-  // Client-side search and filter functionality
+  import {
+    matchesFilter,
+    parseFilterParams,
+    serializeFilterParams,
+    type FilterState,
+  } from '../utils/recipeFilter';
+
+  // Client-side search + multi-tag (AND) + author filter, synced to the URL
   const searchInput = document.getElementById(
     'recipe-search'
-  ) as HTMLInputElement;
-  const tagFilters = document.getElementById('tag-filters');
+  ) as HTMLInputElement | null;
+  const filters = document.getElementById('recipe-filters');
   const recipeGrid = document.getElementById('recipe-grid');
   const noResults = document.getElementById('no-results');
   const gridTitle = document.getElementById('grid-title');
   const recipeCount = document.getElementById('recipe-count');
+  const clearBtn = document.getElementById('clear-filters');
+  const moreTags = document.getElementById(
+    'more-tags'
+  ) as HTMLDetailsElement | null;
 
-  let activeTag = 'all';
-  let searchQuery = '';
+  const state: FilterState = parseFilterParams(window.location.search);
+
+  const titleCase = (s: string) =>
+    s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+
+  function setPillActive(pill: HTMLElement, active: boolean) {
+    pill.classList.toggle('active', active);
+    pill.setAttribute('aria-pressed', String(active));
+  }
+
+  function syncPills() {
+    filters
+      ?.querySelectorAll<HTMLElement>('.tag-pill')
+      .forEach((pill) =>
+        setPillActive(pill, state.tags.includes(pill.dataset.tag || ''))
+      );
+    filters
+      ?.querySelectorAll<HTMLElement>('.author-pill')
+      .forEach((pill) =>
+        setPillActive(
+          pill,
+          !!state.author &&
+            pill.dataset.author?.toLowerCase() === state.author.toLowerCase()
+        )
+      );
+    // Open the extra-tags panel if one of its tags is selected
+    if (moreTags && moreTags.querySelector('.tag-pill.active')) {
+      moreTags.open = true;
+    }
+  }
+
+  function updateUrl() {
+    const url = window.location.pathname + serializeFilterParams(state);
+    window.history.replaceState(null, '', url + window.location.hash);
+  }
 
   function filterRecipes() {
-    const items = recipeGrid?.querySelectorAll(
-      '.recipe-item'
-    ) as NodeListOf<HTMLElement>;
+    const items =
+      recipeGrid?.querySelectorAll<HTMLElement>('.recipe-item') ?? [];
     let visibleCount = 0;
 
-    items?.forEach((item) => {
-      const title = item.dataset.title || '';
-      const tags = item.dataset.tags || '';
-      const ingredients = item.dataset.ingredients || '';
-
-      const query = searchQuery.toLowerCase();
-      const matchesSearch =
-        searchQuery === '' ||
-        title.includes(query) ||
-        ingredients.includes(query);
-      const matchesTag =
-        activeTag === 'all' || tags.split(',').includes(activeTag);
-
-      if (matchesSearch && matchesTag) {
-        item.classList.remove('hidden');
-        visibleCount++;
-      } else {
-        item.classList.add('hidden');
-      }
+    items.forEach((item) => {
+      const visible = matchesFilter(
+        {
+          title: item.dataset.title || '',
+          ingredients: item.dataset.ingredients || '',
+          tags: (item.dataset.tags || '').split(',').filter(Boolean),
+          author: item.dataset.author || '',
+        },
+        state
+      );
+      item.classList.toggle('hidden', !visible);
+      if (visible) visibleCount++;
     });
 
-    // Update count and no results message
-    if (recipeCount) {
-      recipeCount.textContent = `(${visibleCount})`;
-    }
+    if (recipeCount) recipeCount.textContent = `(${visibleCount})`;
+    noResults?.classList.toggle('hidden', visibleCount > 0);
+    recipeGrid?.classList.toggle('hidden', visibleCount === 0);
 
-    if (noResults) {
-      noResults.classList.toggle('hidden', visibleCount > 0);
-    }
+    const hasFilters =
+      state.tags.length > 0 || !!state.author || state.query.trim() !== '';
+    clearBtn?.classList.toggle('hidden', !hasFilters);
 
-    if (recipeGrid) {
-      recipeGrid.classList.toggle('hidden', visibleCount === 0);
-    }
-
-    // Update grid title
     if (gridTitle) {
-      if (activeTag === 'all') {
-        gridTitle.textContent = searchQuery ? `Search Results` : 'All Recipes';
+      const parts: string[] = [];
+      if (state.tags.length > 0)
+        parts.push(state.tags.map(titleCase).join(' + '));
+      if (state.author) parts.push(`by ${state.author}`);
+      if (parts.length > 0) {
+        gridTitle.textContent = parts.join(' ');
       } else {
-        gridTitle.textContent = activeTag
-          .replace(/-/g, ' ')
-          .replace(/\b\w/g, (c) => c.toUpperCase());
+        gridTitle.textContent = state.query.trim()
+          ? 'Search Results'
+          : 'All Recipes';
       }
     }
   }
 
-  // Search input handler
-  searchInput?.addEventListener('input', (e) => {
-    searchQuery = (e.target as HTMLInputElement).value;
+  function update() {
+    syncPills();
     filterRecipes();
+    updateUrl();
+  }
+
+  searchInput?.addEventListener('input', () => {
+    state.query = searchInput.value;
+    filterRecipes();
+    updateUrl();
   });
 
-  // Tag filter handler
-  tagFilters?.addEventListener('click', (e) => {
+  filters?.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;
-    if (target.classList.contains('tag-pill')) {
-      // Update active state
-      tagFilters.querySelectorAll('.tag-pill').forEach((pill) => {
-        pill.classList.remove(
-          'active',
-          'bg-ctp-mauve',
-          'text-ctp-base',
-          'border-ctp-mauve'
-        );
-        pill.classList.add(
-          'bg-ctp-surface0',
-          'text-ctp-subtext1',
-          'border-ctp-surface1'
-        );
-      });
-      target.classList.add(
-        'active',
-        'bg-ctp-mauve',
-        'text-ctp-base',
-        'border-ctp-mauve'
-      );
-      target.classList.remove(
-        'bg-ctp-surface0',
-        'text-ctp-subtext1',
-        'border-ctp-surface1'
-      );
+    const tagPill = target.closest<HTMLElement>('.tag-pill');
+    const authorPill = target.closest<HTMLElement>('.author-pill');
 
-      activeTag = target.dataset.tag || 'all';
-      filterRecipes();
+    if (tagPill?.dataset.tag) {
+      const tag = tagPill.dataset.tag;
+      state.tags = state.tags.includes(tag)
+        ? state.tags.filter((t) => t !== tag)
+        : [...state.tags, tag];
+      update();
+    } else if (authorPill?.dataset.author) {
+      const author = authorPill.dataset.author;
+      state.author =
+        state.author?.toLowerCase() === author.toLowerCase() ? null : author;
+      update();
     }
   });
+
+  clearBtn?.addEventListener('click', () => {
+    state.tags = [];
+    state.author = null;
+    state.query = '';
+    if (searchInput) searchInput.value = '';
+    update();
+  });
+
+  // Initial state from the URL (?tags=meal-prep,chicken&author=Jonas&q=...)
+  if (searchInput && state.query) searchInput.value = state.query;
+  update();
 </script>
