@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Crispy chili beef noodles</title>
+  <desc id="desc">Illustrated noodle bowl with crispy beef, broccoli, carrot ribbons and chilli.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f9e2af"/>
+      <stop offset="0.55" stop-color="#fab387"/>
+      <stop offset="1" stop-color="#e78284"/>
+    </linearGradient>
+    <radialGradient id="bowl" cx="50%" cy="36%" r="58%">
+      <stop offset="0" stop-color="#f9e2af"/>
+      <stop offset="0.55" stop-color="#eba0ac"/>
+      <stop offset="1" stop-color="#cba6f7"/>
+    </radialGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="14" flood-color="#11111b" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  <circle cx="150" cy="650" r="170" fill="#a6e3a1" opacity="0.2"/>
+  <circle cx="1060" cy="130" r="150" fill="#f38ba8" opacity="0.22"/>
+  <g filter="url(#shadow)">
+    <path d="M300 380 h600 a300 260 0 0 1 -600 0z" fill="#313244"/>
+    <ellipse cx="600" cy="380" rx="300" ry="70" fill="#f5e0dc"/>
+    <g fill="none" stroke="#f9e2af" stroke-width="14" stroke-linecap="round" opacity="0.95">
+      <path d="M390 375c80-40 160 30 240-8 80-38 150-8 210 28"/>
+      <path d="M410 405c70-28 150 22 230-6 85-30 155-4 210 22"/>
+      <path d="M370 355c90-20 175 18 250-4 90-26 165 6 230 24"/>
+    </g>
+    <g fill="#e64553">
+      <ellipse cx="500" cy="360" rx="28" ry="18" transform="rotate(-18 500 360)"/>
+      <ellipse cx="620" cy="348" rx="24" ry="16" transform="rotate(12 620 348)"/>
+      <ellipse cx="700" cy="372" rx="22" ry="14" transform="rotate(-8 700 372)"/>
+    </g>
+    <g fill="#40a02b">
+      <circle cx="430" cy="365" r="22"/>
+      <circle cx="760" cy="358" r="20"/>
+      <circle cx="560" cy="390" r="16"/>
+    </g>
+    <g fill="none" stroke="#fe640b" stroke-width="10" stroke-linecap="round">
+      <path d="M450 400 q40 -22 72 2"/>
+      <path d="M680 395 q36 -20 68 4"/>
+    </g>
+    <g fill="#d20f39" opacity="0.9">
+      <ellipse cx="580" cy="335" rx="10" ry="16" transform="rotate(-25 580 335)"/>
+      <ellipse cx="660" cy="400" rx="8" ry="14" transform="rotate(20 660 400)"/>
+    </g>
+  </g>
+</svg>
