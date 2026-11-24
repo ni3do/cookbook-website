@@ -28,7 +28,9 @@ const { tag } = Astro.params;
 const { recipes } = Astro.props;
 
 // Format tag for display (capitalize and replace hyphens with spaces)
-const displayTag = tag.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+const displayTag = tag
+  .replace(/-/g, ' ')
+  .replace(/\b\w/g, (c) => c.toUpperCase());
 ---
 
 <BaseLayout
@@ -39,13 +41,17 @@ const displayTag = tag.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase(
     <div class="max-w-4xl mx-auto px-4 text-center">
       {/* Breadcrumb */}
       <nav class="mb-6" aria-label="Breadcrumb">
-        <ol class="flex items-center justify-center gap-2 text-sm text-ctp-subtext1">
+        <ol
+          class="flex items-center justify-center gap-2 text-sm text-ctp-subtext1"
+        >
           <li>
             <a href="/" class="hover:text-ctp-mauve transition-colors">Home</a>
           </li>
           <li class="text-ctp-overlay0">/</li>
           <li>
-            <a href="/tags" class="hover:text-ctp-mauve transition-colors">Tags</a>
+            <a href="/tags" class="hover:text-ctp-mauve transition-colors"
+              >Tags</a
+            >
           </li>
           <li class="text-ctp-overlay0">/</li>
           <li class="text-ctp-text font-medium">{displayTag}</li>
@@ -56,8 +62,15 @@ const displayTag = tag.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase(
         <span class="text-ctp-mauve">{displayTag}</span> Recipes
       </h1>
       <p class="text-lg text-ctp-subtext1">
-        {recipes.length} {recipes.length === 1 ? 'recipe' : 'recipes'} found
+        {recipes.length}
+        {recipes.length === 1 ? 'recipe' : 'recipes'} found
       </p>
+      <a
+        href={`/?tags=${tag}`}
+        class="inline-block mt-4 text-sm text-ctp-mauve hover:underline"
+      >
+        Combine with other tags or filter by author →
+      </a>
     </div>
   </section>
 
